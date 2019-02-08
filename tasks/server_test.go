@@ -1,0 +1,22 @@
+package tasks
+
+import (
+	"intel/isecl/lib/common/setup"
+	"intel/isecl/threat-detection-service/config"
+
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestServerSetup(t *testing.T) {
+	c := config.Configuration{}
+	s := Server{
+		Flags:  []string{"-port=1337"},
+		Config: &c,
+	}
+	ctx := setup.Context{}
+	err := s.Run(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, 1337, c.Port)
+}
