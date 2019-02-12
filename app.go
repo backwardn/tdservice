@@ -1,6 +1,7 @@
 package main
 
 import (
+	"intel/isecl/threat-detection-service/middleware"
 	"strings"
 	"intel/isecl/threat-detection-service/tasks"
 	"intel/isecl/lib/common/setup"
@@ -162,6 +163,7 @@ func (a *App) startServer() error {
 	tdsDB := &postgres.PostgresDatabase{DB: db}
 	tdsDB.Migrate()
 	r := mux.NewRouter().PathPrefix("/tds").Subrouter()
+	r.Use(middleware.NewBasicAuth(tdsDB.UserRepository()))
 	func(setters ...func(*mux.Router, repository.TDSDatabase)) {
 		for _, s := range setters {
 			s(r, tdsDB)

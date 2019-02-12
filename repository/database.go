@@ -4,4 +4,5 @@ type TDSDatabase interface {
 	Migrate() error
 	HostRepository() HostRepository
 	ReportRepository() ReportRepository
+	UserRepository() UserRepository
 }

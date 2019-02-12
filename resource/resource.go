@@ -9,6 +9,21 @@ import (
 
 type errorHandlerFunc func(w http.ResponseWriter, r *http.Request) error
 
+func (ehf errorHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if err := ehf(w, r); err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		switch t := err.(type) {
+		case *resourceError:
+			http.Error(w, t.Message, t.StatusCode)
+		default:
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+
 type resourceError struct {
 	StatusCode int
 	Message    string
@@ -16,21 +31,4 @@ type resourceError struct {
 
 func (e resourceError) Error() string {
 	return fmt.Sprintf("%d: %s", e.StatusCode, e.Message)
-}
-
-func errorHandler(eh errorHandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if err := eh(w, r); err != nil {
-			if gorm.IsRecordNotFoundError(err) {
-				http.Error(w, err.Error(), http.StatusNotFound)
-				return
-			}
-			switch t := err.(type) {
-			case *resourceError:
-				http.Error(w, t.Message, t.StatusCode)
-			default:
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-		}
-	}
 }

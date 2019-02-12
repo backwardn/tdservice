@@ -8,7 +8,7 @@ type HostInfo struct {
 }
 
 type Host struct {
-	ID string `json:"id"`
+	ID string `json:"id" gorm:"primary_key;type:uuid;"`
 	// embed
 	HostInfo
 	Status string `json:"status"`

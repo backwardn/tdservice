@@ -21,5 +21,9 @@ func (pd *PostgresDatabase) HostRepository() repository.HostRepository {
 }
 
 func (pd *PostgresDatabase) ReportRepository() repository.ReportRepository {
-	return nil
+	return &PostgresReportRepository{db: pd.DB}
+}
+
+func (pd *PostgresDatabase) UserRepository() repository.UserRepository {
+	return &PostgresUserRepository{db: pd.DB}
 }
