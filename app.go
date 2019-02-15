@@ -24,7 +24,6 @@ import (
 
 	stdlog "log"
 
-	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/handlers"
@@ -83,6 +82,12 @@ func (a *App) Run(args []string) error {
 	switch cmd {
 	case "run":
 		return a.startServer()
+	case "-help":
+		fallthrough
+	case "--h":
+		fallthrough
+	case "--help":
+		fallthrough
 	case "help":
 		a.printUsage()
 	case "start":
@@ -99,12 +104,23 @@ func (a *App) Run(args []string) error {
 		os.Exit(0)
 	case "setup": 
 		if len(args) < 2 {
-			fmt.Fprintln(os.Stdout, "Available setup tasks:\n- server\n- tls\n- all")
+			fmt.Fprintln(os.Stdout, "Available setup tasks:\n- database\n- admin\n- server\n- tls\n-----------------\n- [all]")
 		}
 		task := strings.ToLower(args[1])
 		flags := args[2:]
 		setupRunner := &setup.Runner {
 			Tasks: []setup.Task{
+				tasks.Database{
+					Flags: flags,
+					Config: a.configuration(),
+				},
+				tasks.Admin{
+					Flags: flags,
+					DatabaseFactory: func() (repository.TDSDatabase, error) {
+						pg := &a.configuration().Postgres
+						return postgres.Open(pg.Hostname, pg.Port, pg.DBName, pg.Username, pg.Password, pg.SSLMode)
+					},
+				},
 				tasks.Server{
 					Flags: flags,
 					Config: a.configuration(),
@@ -112,7 +128,7 @@ func (a *App) Run(args []string) error {
 				tasks.TLS{
 					Flags: flags,
 					TLSCertFile: path.Join(a.ConfigDir, constants.TLSCertFile),
-					TLSKeyFile: path.Join(a.ConfigDir, constants.TLSKeyFile),
+					TLSKeyFile: path.Join(a.ConfigDir, constants.TLSKeyFile), 
 				},
 			},
 			AskInput: false,
@@ -132,36 +148,19 @@ func (a *App) Run(args []string) error {
 }
 
 func (a *App) startServer() error {
-	// start webserver
-	var sslMode string
 	c := a.configuration()
-	if a.configuration().Postgres.SSLMode {
-		sslMode = "enable"
-	} else {
-		sslMode = "disable"
+
+	// Open database
+	tdsDB, err := postgres.Open(c.Postgres.Hostname, c.Postgres.Port, c.Postgres.DBName, c.Postgres.Username, c.Postgres.Password, c.Postgres.SSLMode)
+	if err != nil {
+		log.WithError(err).Error("failed to open Postgres database")
+		return err
 	}
-	var db *gorm.DB
-	var dbErr error
-	const numAttempts = 4
-	for i := 0; i < numAttempts; i = i + 1 {
-		const retryTime = 5
-		db, dbErr = gorm.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
-			c.Postgres.Hostname, c.Postgres.Port, c.Postgres.Username, c.Postgres.DBName, c.Postgres.Password, sslMode))
-		if dbErr != nil {
-			log.WithError(dbErr).Info("Failed to connect to DB, retrying")
-			fmt.Fprintf(a.consoleWriter(), "Failed to connect to DB, retrying in %d seconds...\n", retryTime)
-		} else {
-			break
-		}
-		time.Sleep(retryTime * time.Second)
-	}
-	defer db.Close()
-	if dbErr != nil {
-		log.WithError(dbErr).Infof("Failed to connect to db after %d attempts\n", numAttempts)
-		return dbErr
-	}
-	tdsDB := &postgres.PostgresDatabase{DB: db}
+	defer tdsDB.Close()
+	log.Trace("Migrating Database")
 	tdsDB.Migrate()
+
+	// Create Router, set routes
 	r := mux.NewRouter().PathPrefix("/tds").Subrouter()
 	r.Use(middleware.NewBasicAuth(tdsDB.UserRepository()))
 	func(setters ...func(*mux.Router, repository.TDSDatabase)) {
@@ -170,6 +169,7 @@ func (a *App) startServer() error {
 		}
 	}(resource.SetHosts, resource.SetReports)
 
+	// Setup signal handlers to gracefully handle termination
 	stop := make(chan os.Signal)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	httpLog := stdlog.New(a.httpLogWriter(), "", 0)
@@ -178,6 +178,8 @@ func (a *App) startServer() error {
 		Handler:  handlers.RecoveryHandler(handlers.RecoveryLogger(httpLog), handlers.PrintRecoveryStack(true))(handlers.CombinedLoggingHandler(a.httpLogWriter(), r)),
 		ErrorLog: httpLog,
 	}
+
+	// dispatch web server go routine
 	go func() {
 		tlsCert := path.Join(a.ConfigDir, constants.TLSCertFile)
 		tlsKey := path.Join(a.ConfigDir, constants.TLSKeyFile)
@@ -186,6 +188,8 @@ func (a *App) startServer() error {
 			stop <- syscall.SIGTERM
 		}
 	}()
+
+	// TODO dispatch agent status checker goroutine
 	<-stop
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

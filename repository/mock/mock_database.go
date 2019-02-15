@@ -25,3 +25,7 @@ func (m *MockDatabase) ReportRepository() repository.ReportRepository {
 func (m *MockDatabase) UserRepository() repository.UserRepository {
 	return &m.MockUserRepository
 }
+
+func (m *MockDatabase) Close() {
+
+}
