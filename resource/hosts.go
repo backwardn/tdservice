@@ -3,7 +3,6 @@ package resource
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"intel/isecl/threat-detection-service/repository"
 	"intel/isecl/threat-detection-service/types"
 	"net/http"
@@ -62,7 +61,6 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 func getHost(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		id := mux.Vars(r)["id"]
-		fmt.Println(id)
 		h, err := db.HostRepository().Retrieve(types.Host{ID: id})
 		if err != nil {
 			return err

@@ -50,6 +50,16 @@ func queryReport(db repository.TDSDatabase) errorHandlerFunc {
 
 func getReport(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		id := mux.Vars(r)["id"]
+		h, err := db.ReportRepository().Retrieve(&types.Report{ID: id})
+		if err != nil {
+			return err
+		}
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(&h)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 }
