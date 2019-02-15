@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreate(t *testing.T) {
+func TestCreateHost(t *testing.T) {
 	assert := assert.New(t)
 	db := new(mock.MockDatabase)
 	var hostCreated bool
@@ -35,7 +35,7 @@ func TestCreate(t *testing.T) {
 	assert.True(hostCreated)
 }
 
-func TestRetrieve(t *testing.T) {
+func TestRetrieveHost(t *testing.T) {
 	assert := assert.New(t)
 	db := new(mock.MockDatabase)
 	var hostRetrieved bool
@@ -62,7 +62,7 @@ func TestRetrieve(t *testing.T) {
 	assert.NotEmpty(recorder.Body.String())
 }
 
-func TestRetrieve404(t *testing.T) {
+func TestRetrieveHost404(t *testing.T) {
 	assert := assert.New(t)
 	db := new(mock.MockDatabase)
 	db.MockHostRepository.RetrieveFunc = func(h types.Host) (*types.Host, error) {
