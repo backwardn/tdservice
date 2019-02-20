@@ -18,6 +18,8 @@ func (ehf errorHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch t := err.(type) {
 		case *resourceError:
 			http.Error(w, t.Message, t.StatusCode)
+		case resourceError:
+			http.Error(w, t.Message, t.StatusCode)
 		default:
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

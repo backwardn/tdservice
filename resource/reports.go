@@ -5,6 +5,7 @@ import (
 	"intel/isecl/threat-detection-service/repository"
 	"intel/isecl/threat-detection-service/types"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/handlers"
 
@@ -43,6 +44,39 @@ func createReport(db repository.TDSDatabase) errorHandlerFunc {
 
 func queryReport(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		q := r.URL.Query()
+		hostname := q.Get("hostname")
+		hostID := q.Get("hostid")
+		fromStr := q.Get("from")
+		toStr := q.Get("to")
+		var from time.Time
+		var to time.Time
+		var err error
+		if fromStr != "" {
+			from, err = time.Parse(time.RFC3339, fromStr)
+			if err != nil {
+				log.WithError(err).WithField("from", fromStr).Error("failed to parse RFC3339 date")
+				// explicitly return bad request
+				return &resourceError{Message: err.Error(), StatusCode: http.StatusBadRequest}
+			}
+		}
+		if toStr != "" {
+			to, err = time.Parse(time.RFC3339, toStr)
+			if err != nil {
+				log.WithError(err).WithField("to", toStr).Error("failed to parse RFC3339 ")
+				// explicitly return bad request
+				return err
+			}
+		}
+		filter := repository.ReportFilter{}
+		filter.Hostname = hostname
+		filter.HostID = hostID
+		filter.From = from
+		filter.To = to
+
+		reports, err := db.ReportRepository().RetrieveByFilterCriteria(filter)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(&reports)
 		return nil
 	}
 }

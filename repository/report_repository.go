@@ -1,8 +1,15 @@
 package repository
 
-import "intel/isecl/threat-detection-service/types"
+import (
+	"intel/isecl/threat-detection-service/types"
+	"time"
+)
 
 type ReportFilter struct {
+	types.Report
+	Hostname string
+	From     time.Time
+	To       time.Time
 }
 
 type ReportRepository interface {
