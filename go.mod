@@ -6,8 +6,8 @@ require (
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/sirupsen/logrus v1.3.0
-	github.com/stretchr/testify v1.2.2
-	golang.org/x/crypto v0.0.0-20180904163835-0709b304e793
+	github.com/stretchr/testify v1.3.0
+	golang.org/x/crypto v0.0.0-20190219172222-a4c6cb3142f2
 	gopkg.in/yaml.v2 v2.2.2
 	intel/isecl/lib/common v0.0.0
 )
