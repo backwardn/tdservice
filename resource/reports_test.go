@@ -127,3 +127,17 @@ func TestQueryReports(t *testing.T) {
 	r.ServeHTTP(recorder, req)
 	assert.Equal(http.StatusOK, recorder.Code)
 }
+
+func TestBadQueryReports(t *testing.T) {
+	assert := assert.New(t)
+	db := new(mock.MockDatabase)
+	r := setupRouter(db)
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/tds/reports?from=NOTRFC3339", nil)
+	r.ServeHTTP(recorder, req)
+	assert.Equal(http.StatusBadRequest, recorder.Code)
+	req = httptest.NewRequest("GET", "/tds/reports?to=NOTRFC3339", nil)
+	recorder = httptest.NewRecorder()
+	r.ServeHTTP(recorder, req)
+	assert.Equal(http.StatusBadRequest, recorder.Code)
+}

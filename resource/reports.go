@@ -65,7 +65,7 @@ func queryReport(db repository.TDSDatabase) errorHandlerFunc {
 			if err != nil {
 				log.WithError(err).WithField("to", toStr).Error("failed to parse RFC3339 ")
 				// explicitly return bad request
-				return err
+				return &resourceError{Message: err.Error(), StatusCode: http.StatusBadRequest}
 			}
 		}
 		filter := repository.ReportFilter{}
