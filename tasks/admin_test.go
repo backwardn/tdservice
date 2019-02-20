@@ -3,9 +3,9 @@ package tasks
 import (
 	"errors"
 	"intel/isecl/lib/common/setup"
-	"intel/isecl/threat-detection-service/repository"
-	"intel/isecl/threat-detection-service/repository/mock"
-	"intel/isecl/threat-detection-service/types"
+	"intel/isecl/tdservice/repository"
+	"intel/isecl/tdservice/repository/mock"
+	"intel/isecl/tdservice/types"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

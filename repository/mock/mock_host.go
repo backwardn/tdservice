@@ -1,6 +1,6 @@
 package mock
 
-import "intel/isecl/threat-detection-service/types"
+import "intel/isecl/tdservice/types"
 
 type MockHostRepository struct {
 	CreateFunc      func(types.Host) (*types.Host, error)

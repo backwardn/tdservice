@@ -4,8 +4,8 @@ import (
 	"errors"
 	"flag"
 	"intel/isecl/lib/common/setup"
-	"intel/isecl/threat-detection-service/repository"
-	"intel/isecl/threat-detection-service/types"
+	"intel/isecl/tdservice/repository"
+	"intel/isecl/tdservice/types"
 
 	"golang.org/x/crypto/bcrypt"
 

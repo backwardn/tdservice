@@ -4,7 +4,7 @@ import (
 	"errors"
 	"flag"
 	"intel/isecl/lib/common/setup"
-	"intel/isecl/threat-detection-service/config"
+	"intel/isecl/tdservice/config"
 )
 
 type Database struct {

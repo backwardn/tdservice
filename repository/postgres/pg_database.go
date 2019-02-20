@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"fmt"
-	"intel/isecl/threat-detection-service/repository"
-	"intel/isecl/threat-detection-service/types"
+	"intel/isecl/tdservice/repository"
+	"intel/isecl/tdservice/types"
 	"time"
 
 	"github.com/jinzhu/gorm"

@@ -2,7 +2,7 @@ package tasks
 
 import (
 	"intel/isecl/lib/common/setup"
-	"intel/isecl/threat-detection-service/config"
+	"intel/isecl/tdservice/config"
 	"os"
 	"testing"
 

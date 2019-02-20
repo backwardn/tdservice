@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"intel/isecl/threat-detection-service/types"
+	"intel/isecl/tdservice/types"
 	"time"
 )
 

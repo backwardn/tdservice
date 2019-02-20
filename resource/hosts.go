@@ -3,8 +3,8 @@ package resource
 import (
 	"encoding/json"
 	"errors"
-	"intel/isecl/threat-detection-service/repository"
-	"intel/isecl/threat-detection-service/types"
+	"intel/isecl/tdservice/repository"
+	"intel/isecl/tdservice/types"
 	"net/http"
 
 	"github.com/gorilla/handlers"

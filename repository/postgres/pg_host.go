@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"intel/isecl/threat-detection-service/types"
+	"intel/isecl/tdservice/types"
 
 	"github.com/jinzhu/gorm"
 )

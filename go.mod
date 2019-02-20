@@ -1,4 +1,4 @@
-module intel/isecl/threat-detection-service
+module intel/isecl/tdservice
 
 require (
 	github.com/gorilla/handlers v1.4.0

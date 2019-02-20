@@ -1,6 +1,6 @@
 package repository
 
-import "intel/isecl/threat-detection-service/types"
+import "intel/isecl/tdservice/types"
 
 type HostRepository interface {
 	// Create should return a pointer to Host

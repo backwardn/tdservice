@@ -1,6 +1,6 @@
 package repository
 
-import "intel/isecl/threat-detection-service/types"
+import "intel/isecl/tdservice/types"
 
 type UserRepository interface {
 	Create(types.User) (*types.User, error)

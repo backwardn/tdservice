@@ -1,7 +1,7 @@
 package resource
 
 import (
-	"intel/isecl/threat-detection-service/repository"
+	"intel/isecl/tdservice/repository"
 
 	"github.com/gorilla/mux"
 )

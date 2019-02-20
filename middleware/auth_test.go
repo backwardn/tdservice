@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"intel/isecl/threat-detection-service/repository/mock"
-	"intel/isecl/threat-detection-service/types"
+	"intel/isecl/tdservice/repository/mock"
+	"intel/isecl/tdservice/types"
 	"net/http"
 	"net/http/httptest"
 	"testing"

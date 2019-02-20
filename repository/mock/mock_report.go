@@ -1,8 +1,8 @@
 package mock
 
 import (
-	"intel/isecl/threat-detection-service/repository"
-	"intel/isecl/threat-detection-service/types"
+	"intel/isecl/tdservice/repository"
+	"intel/isecl/tdservice/types"
 )
 
 type MockReportRepository struct {

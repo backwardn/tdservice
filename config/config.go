@@ -1,7 +1,7 @@
 package config
 
 import (
-	"intel/isecl/threat-detection-service/constants"
+	"intel/isecl/tdservice/constants"
 	"os"
 	"path"
 	"sync"

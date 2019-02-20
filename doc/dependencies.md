@@ -1,9 +1,11 @@
 # Threat Detection Service Dependency Report 2/20/19
 
-`go list -m -u -f '{{ if not .Indirect }} {{ .Path }} {{.Version}} {{ if .Update}} Update Available {{.Update.Version}} {{end}} {{end}}'  all`
+```console
+go list -m -u -f '{{ if not .Indirect }} {{ .Path }} {{.Version}} {{ if .Update}} Update Available {{.Update.Version}} {{end}} {{end}}'  all
+```
 
 
-# [Gorilla Toolkit](https://whitelisttool.amr.corp.intel.com/view.php?id=6177) **WHITELISTED**
+# [Gorilla Toolkit](https://whitelisttool.amr.corp.intel.com/view.php?id=6177)  <span style="color:green">**WHITELISTED**</span>
 
 ## Source URLs
 1. github.com/gorilla/mux v1.7.0  
@@ -15,7 +17,7 @@
 
 *A permissive license similar to the BSD 2-Clause License, but with a 3rd clause that prohibits others from using the name of the project or its contributors to promote derived products without written consent.*
 
-# [Gorm](https://whitelisttool.amr.corp.intel.com/view.php?id=8989) **WHITELISTED**
+# [Gorm](https://whitelisttool.amr.corp.intel.com/view.php?id=8989) <span style="color:green">**WHITELISTED**</span>
 
 ## Source URLs
 1. github.com/jinzhu/gorm
@@ -26,7 +28,7 @@
 
 *A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.*
 
-# [Logrus](https://whitelisttool.amr.corp.intel.com/view.php?id=8145) **CONDITIONAL**
+# [Logrus](https://whitelisttool.amr.corp.intel.com/view.php?id=8145) <span style="color:gold">**CONDITIONAL**
 
 ## Source URLs
 1. https://whitelisttool.amr.corp.intel.com/view.php?id=8145
@@ -38,7 +40,7 @@
 *A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.*
 
 
-# [Golang Crypto](https://whitelisttool.amr.corp.intel.com/view.php?id=8975) **WHITELISTED**
+# [Golang Crypto](https://whitelisttool.amr.corp.intel.com/view.php?id=8975)  <span style="color:green">**WHITELISTED**</span>
 
 ## Source URLs
 1. [godoc.org/golang.org/x/crypto (Official golang package)](https://github.com/golang/crypto/)
@@ -65,7 +67,7 @@ Part of Canonical's juju project
 Go code licensed under Apache Version 2.0
 Ported code from libyaml retains original license under original MIT license
 
-# [Testify](https://whitelisttool.amr.corp.intel.com/view.php?id=8963) **WHITELISTED** (Unit Test Only Dependency)
+# [Testify](https://whitelisttool.amr.corp.intel.com/view.php?id=8963) <span style="color:green">**WHITELISTED**</span> (Unit Test Only Dependency)
 
 ## Source URLs
 
