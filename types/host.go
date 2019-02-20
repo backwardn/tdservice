@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type HostInfo struct {
 	Hostname string `json:"hostname"`
 	Version  string `json:"version"`
@@ -8,7 +10,10 @@ type HostInfo struct {
 }
 
 type Host struct {
-	ID string `json:"id" gorm:"primary_key;type:uuid;"`
+	ID        string     `json:"id" gorm:"primary_key;type:uuid;"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
 	// embed
 	HostInfo
 	Status string `json:"status"`

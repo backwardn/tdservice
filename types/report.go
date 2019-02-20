@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type Detection struct {
 	Description      string   `json:"detection"`
 	PID              int      `json:"pid"`
@@ -15,10 +17,13 @@ type Detection struct {
 }
 
 type Report struct {
-	ID        string    `json:"id"  gorm:"primary_key;type:uuid;"`
-	HostID    string    `json:"host_id"`
-	Host      Host      `json:"-"`
-	Detection Detection `json:"detection"`
+	ID        string     `json:"id"  gorm:"primary_key;type:uuid;"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
+	HostID    string     `json:"host_id"`
+	Host      Host       `json:"-"`
+	Detection Detection  `json:"detection"`
 	Error     struct {
 		Description string `json:"description"`
 	} `json:"error,omitempty"`
