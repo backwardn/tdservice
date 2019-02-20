@@ -14,7 +14,7 @@ import (
 )
 
 func SetHosts(r *mux.Router, db repository.TDSDatabase) {
-	r.Handle("/hosts", handlers.ContentTypeHandler(createHost(db), "application/json"))
+	r.Handle("/hosts", handlers.ContentTypeHandler(createHost(db), "application/json")).Methods("POST")
 	r.Handle("/hosts", queryHosts(db)).Methods("GET")
 	r.Handle("/hosts/{id}", deleteHost(db)).Methods("DELETE")
 	r.Handle("/hosts/{id}", getHost(db)).Methods("GET")

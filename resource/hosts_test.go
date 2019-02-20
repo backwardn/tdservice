@@ -2,6 +2,7 @@ package resource
 
 import (
 	"bytes"
+	"encoding/json"
 	"intel/isecl/threat-detection-service/repository/mock"
 	"intel/isecl/threat-detection-service/types"
 	"net/http"
@@ -105,4 +106,34 @@ func TestDeleteHost404(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/tds/hosts/12345", nil)
 	r.ServeHTTP(recorder, req)
 	assert.Equal(http.StatusNotFound, recorder.Code)
+}
+
+func TestQueryHosts(t *testing.T) {
+	assert := assert.New(t)
+	db := new(mock.MockDatabase)
+	filter := types.Host{
+		HostInfo: types.HostInfo{
+			Hostname: "10.1.2.3",
+			Version:  "1.0",
+			Build:    "1234",
+			OS:       "linux",
+		},
+		Status: "online",
+	}
+	db.MockHostRepository.RetrieveAllFunc = func(h types.Host) ([]types.Host, error) {
+		assert.Equal(filter, h)
+		h.ID = "12345"
+		return []types.Host{h}, nil
+	}
+	r := setupRouter(db)
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/tds/hosts?hostname=10.1.2.3&version=1.0&build=1234&os=linux&status=online", nil)
+	r.ServeHTTP(recorder, req)
+	assert.Equal(http.StatusOK, recorder.Code)
+	// setup expected
+	filter.ID = "12345"
+	expected := []types.Host{filter}
+	var actual []types.Host
+	json.Unmarshal(recorder.Body.Bytes(), &actual)
+	assert.Equal(expected, actual)
 }
