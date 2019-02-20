@@ -5,17 +5,17 @@ import (
 )
 
 type MockUserRepository struct {
-	CreateFunc   func(types.User) error
+	CreateFunc   func(types.User) (*types.User, error)
 	RetrieveFunc func(types.User) (*types.User, error)
 	UpdateFunc   func(types.User) error
 	DeleteFunc   func(types.User) error
 }
 
-func (m *MockUserRepository) Create(user types.User) error {
+func (m *MockUserRepository) Create(user types.User) (*types.User, error) {
 	if m.CreateFunc != nil {
 		return m.CreateFunc(user)
 	}
-	return nil
+	return nil, nil
 }
 
 func (m *MockUserRepository) Retrieve(user types.User) (*types.User, error) {

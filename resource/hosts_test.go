@@ -17,13 +17,14 @@ func TestCreateHost(t *testing.T) {
 	assert := assert.New(t)
 	db := new(mock.MockDatabase)
 	var hostCreated bool
-	db.MockHostRepository.CreateFunc = func(h types.Host) error {
+	db.MockHostRepository.CreateFunc = func(h types.Host) (*types.Host, error) {
 		hostCreated = true
+		h.ID = "12345"
 		assert.Equal("host.intel.com", h.Hostname)
 		assert.Equal("v1.0", h.Version)
 		assert.Equal("1234", h.Build)
 		assert.Equal("linux", h.OS)
-		return nil
+		return &h, nil
 	}
 	r := setupRouter(db)
 	recorder := httptest.NewRecorder()
@@ -71,6 +72,37 @@ func TestRetrieveHost404(t *testing.T) {
 	r := setupRouter(db)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/tds/hosts/12345", nil)
+	r.ServeHTTP(recorder, req)
+	assert.Equal(http.StatusNotFound, recorder.Code)
+}
+
+func TestDeleteHost(t *testing.T) {
+	assert := assert.New(t)
+	db := new(mock.MockDatabase)
+	id := "12345"
+	var deleted bool
+	db.MockHostRepository.DeleteFunc = func(h types.Host) error {
+		assert.Equal(id, h.ID)
+		deleted = true
+		return nil
+	}
+	r := setupRouter(db)
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("DELETE", "/tds/hosts/12345", nil)
+	r.ServeHTTP(recorder, req)
+	assert.Equal(http.StatusNoContent, recorder.Code)
+	assert.True(deleted)
+}
+
+func TestDeleteHost404(t *testing.T) {
+	assert := assert.New(t)
+	db := new(mock.MockDatabase)
+	db.MockHostRepository.DeleteFunc = func(h types.Host) error {
+		return gorm.ErrRecordNotFound
+	}
+	r := setupRouter(db)
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("DELETE", "/tds/hosts/12345", nil)
 	r.ServeHTTP(recorder, req)
 	assert.Equal(http.StatusNotFound, recorder.Code)
 }

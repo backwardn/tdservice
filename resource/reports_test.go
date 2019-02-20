@@ -35,12 +35,12 @@ func TestCreateReport(t *testing.T) {
 			ThreatClass:      "spectre variant 1",
 		},
 	}
-	db.MockReportRepository.CreateFunc = func(r *types.Report) error {
+	db.MockReportRepository.CreateFunc = func(r types.Report) (*types.Report, error) {
 		reportCreated = true
 		r.ID = "1"
 		r.Host = types.Host{ID: "2"}
 		assert.Equal(report.Detection, r.Detection)
-		return nil
+		return &r, nil
 	}
 	reportJSON, _ := json.Marshal(report)
 
@@ -77,7 +77,7 @@ func TestRetrieveReport(t *testing.T) {
 		},
 	}
 	var reportRetrieved bool
-	db.MockReportRepository.RetrieveFunc = func(h *types.Report) (*types.Report, error) {
+	db.MockReportRepository.RetrieveFunc = func(h types.Report) (*types.Report, error) {
 		reportRetrieved = true
 		assert.Equal("1", h.ID)
 		return &report, nil

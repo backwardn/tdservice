@@ -28,12 +28,11 @@ func createReport(db repository.TDSDatabase) errorHandlerFunc {
 			log.WithError(err).Error("failed to decode input body as types.Report")
 			return err
 		}
-		db.ReportRepository().Create(&report)
+		created, err := db.ReportRepository().Create(report)
 
 		w.WriteHeader(http.StatusCreated) // HTTP 201
 		w.Header().Set("Content-Type", "application/json")
-		encoder := json.NewEncoder(w)
-		err = encoder.Encode(report)
+		err = json.NewEncoder(w).Encode(&created)
 		if err != nil {
 			log.WithError(err).Error("failed to encode response body as types.Report")
 			return err
@@ -51,7 +50,7 @@ func queryReport(db repository.TDSDatabase) errorHandlerFunc {
 func getReport(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		id := mux.Vars(r)["id"]
-		h, err := db.ReportRepository().Retrieve(&types.Report{ID: id})
+		h, err := db.ReportRepository().Retrieve(types.Report{ID: id})
 		if err != nil {
 			return err
 		}

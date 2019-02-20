@@ -10,8 +10,9 @@ type PostgresUserRepository struct {
 	db *gorm.DB
 }
 
-func (r *PostgresUserRepository) Create(u types.User) error {
-	return r.db.Create(&u).Error
+func (r *PostgresUserRepository) Create(u types.User) (*types.User, error) {
+	err := r.db.Create(&u).Error
+	return &u, err
 }
 
 func (r *PostgresUserRepository) Retrieve(u types.User) (*types.User, error) {

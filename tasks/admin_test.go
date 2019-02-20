@@ -30,12 +30,12 @@ func TestValidateAdmin(t *testing.T) {
 func TestCreateAdmin(t *testing.T) {
 	m := &mock.MockDatabase{}
 	var user *types.User
-	m.MockUserRepository.CreateFunc = func(u types.User) error {
+	m.MockUserRepository.CreateFunc = func(u types.User) (*types.User, error) {
 		assert.Equal(t, "admin", u.Name)
 		assert.NoError(t, u.CheckPassword([]byte("foobar")))
 		u.ID = "123456"
 		user = &u
-		return nil
+		return user, nil
 	}
 	m.MockUserRepository.RetrieveFunc = func(u types.User) (*types.User, error) {
 		if user == nil {

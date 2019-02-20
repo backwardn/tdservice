@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/handlers"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
 )
@@ -44,13 +45,13 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		}
 		// add the host
 		// the server, on a separate go routine, will periodically ping all registered hosts to update their status
-		err = db.HostRepository().Create(h)
+		created, err := db.HostRepository().Create(h)
 		if err != nil {
 			return err
 		}
 		w.WriteHeader(http.StatusCreated) // HTTP 201
 		w.Header().Set("Content-Type", "application/json")
-		err = json.NewEncoder(w).Encode(&h)
+		err = json.NewEncoder(w).Encode(&created)
 		if err != nil {
 			return err
 		}
@@ -63,11 +64,13 @@ func getHost(db repository.TDSDatabase) errorHandlerFunc {
 		id := mux.Vars(r)["id"]
 		h, err := db.HostRepository().Retrieve(types.Host{ID: id})
 		if err != nil {
+			log.WithError(err).WithField("id", id).Info("failed to retrieve host")
 			return err
 		}
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(&h)
 		if err != nil {
+			log.WithError(err).Error("failed to encode json response")
 			return err
 		}
 		return nil
@@ -76,12 +79,43 @@ func getHost(db repository.TDSDatabase) errorHandlerFunc {
 
 func deleteHost(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		id := mux.Vars(r)["id"]
+		if err := db.HostRepository().Delete(types.Host{ID: id}); err != nil {
+			log.WithError(err).WithField("id", id).Info("failed to delete host")
+			return err
+		}
+		w.WriteHeader(http.StatusNoContent)
 		return nil
 	}
 }
 
 func queryHosts(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		// check for query parameters
+		log.WithField("query", r.URL.Query()).Trace("query hosts")
+		hostname := r.URL.Query().Get("hostname")
+		version := r.URL.Query().Get("version")
+		build := r.URL.Query().Get("build")
+		os := r.URL.Query().Get("os")
+		status := r.URL.Query().Get("status")
+
+		filter := types.Host{
+			HostInfo: types.HostInfo{
+				Hostname: hostname,
+				Version:  version,
+				Build:    build,
+				OS:       os,
+			},
+			Status: status,
+		}
+
+		hosts, err := db.HostRepository().RetrieveAll(filter)
+		if err != nil {
+			log.WithError(err).WithField("filter", filter).Info("failed to retrieve hosts")
+			return err
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(hosts)
 		return nil
 	}
 }
