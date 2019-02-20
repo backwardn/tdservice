@@ -43,11 +43,7 @@ func createReport(db repository.TDSDatabase) errorHandlerFunc {
 
 func queryReport(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		q := r.URL.Query()
-		hostname := q.Get("hostname")
-		hostID := q.Get("hostid")
-		from := q.Get("from")
-		to := q.Get("to")
+		return nil
 	}
 }
 
