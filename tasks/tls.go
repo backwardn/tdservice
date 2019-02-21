@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"intel/isecl/lib/common/setup"
+	"io"
 	"math/big"
 	"net"
 	"os"
@@ -20,9 +21,10 @@ import (
 // Should move this to lib common, as it is duplicated across TDS and TDA
 
 type TLS struct {
-	Flags       []string
-	TLSKeyFile  string
-	TLSCertFile string
+	Flags         []string
+	TLSKeyFile    string
+	TLSCertFile   string
+	ConsoleWriter io.Writer
 }
 
 func outboundHost() (string, error) {
@@ -81,6 +83,7 @@ func createSelfSignedCert(hosts []string) (key []byte, cert []byte, err error) {
 }
 
 func (ts TLS) Run(c setup.Context) error {
+	fmt.Fprintln(ts.ConsoleWriter, "Running tls setup...")
 	fs := flag.NewFlagSet("tls", flag.ContinueOnError)
 	force := fs.Bool("force", false, "force recreation, will overwrite any existing tls keys")
 	defaultHostname, err := c.GetenvString("TDS_TLS_HOSTS", "comma separated list of hostnames to add to TLS self signed cert")

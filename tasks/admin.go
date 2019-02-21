@@ -3,9 +3,11 @@ package tasks
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"intel/isecl/lib/common/setup"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
+	"io"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -15,9 +17,11 @@ import (
 type Admin struct {
 	Flags           []string
 	DatabaseFactory func() (repository.TDSDatabase, error)
+	ConsoleWriter   io.Writer
 }
 
 func (a Admin) Run(c setup.Context) error {
+	fmt.Fprintln(a.ConsoleWriter, "Running admin setup...")
 	envUser, _ := c.GetenvString("TDS_ADMIN_USERNAME", "Username for admin authentication")
 	envPass, _ := c.GetenvSecret("TDS_ADMIN_PASSWORD", "Password for admin authentication")
 	fs := flag.NewFlagSet("admin", flag.ContinueOnError)

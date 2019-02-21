@@ -3,16 +3,20 @@ package tasks
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"intel/isecl/lib/common/setup"
 	"intel/isecl/tdservice/config"
+	"io"
 )
 
 type Database struct {
-	Flags  []string
-	Config *config.Configuration
+	Flags         []string
+	Config        *config.Configuration
+	ConsoleWriter io.Writer
 }
 
 func (db Database) Run(c setup.Context) error {
+	fmt.Fprintln(db.ConsoleWriter, "Running database setup...")
 	envHost, _ := c.GetenvString("TDS_DB_HOSTNAME", "Database Hostname")
 	envPort, _ := c.GetenvInt("TDS_DB_PORT", "Database Port")
 	envUser, _ := c.GetenvString("TDS_DB_USERNAME", "Database Username")

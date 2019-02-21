@@ -10,7 +10,7 @@ type HostInfo struct {
 }
 
 type Host struct {
-	ID        string     `json:"id" gorm:"primary_key;type:uuid;"`
+	ID        string     `json:"id" gorm:"primary_key;type:uuid;default:uuid_generate_v4()"`
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `json:"-"`

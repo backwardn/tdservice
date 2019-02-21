@@ -18,7 +18,7 @@ installer: tdservice
 	mkdir -p out/installer
 	cp dist/linux/install.sh out/installer/install.sh && chmod +x out/installer/install.sh
 	cp out/tdservice out/installer/tdservice
-	makeself out/installer out/tdservice-$(VERSION)-$(GITCOMMIT).bin "Threat Detection Service $(VERSION)" ./install.sh
+	makeself --notemp out/installer out/tdservice-$(VERSION).bin "Threat Detection Service $(VERSION)" ./install.sh
 
 docker: installer
 	cp dist/docker/entrypoint.sh out/entrypoint.sh && chmod +x out/entrypoint.sh

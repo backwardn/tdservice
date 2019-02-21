@@ -1,3 +1,3 @@
 #!/bin/bash
 
-tdservice setup &&  tdservice run
+tdservice setup all && tdservice run

@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/rhel7-init:7.5
+FROM registry.access.redhat.com/rhel7:7.5
 
 COPY tdservice-*.bin /tmp/tdservice.bin
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

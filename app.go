@@ -28,6 +28,8 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	// Import driver for GORM
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 type App struct {
@@ -72,6 +74,13 @@ func (a *App) configuration() *config.Configuration {
 	return config.Global
 }
 
+func (a *App) executablePath() string {
+	if a.ExecutablePath != "" {
+		return a.ExecutablePath
+	} 
+	return os.Args[0]
+}
+
 func (a *App) Run(args []string) error {
 	if len(args) < 2 {
 		a.printUsage()
@@ -103,32 +112,43 @@ func (a *App) Run(args []string) error {
 		a.uninstall(keepConfig)
 		os.Exit(0)
 	case "setup": 
-		if len(args) < 2 {
+		if len(args) <= 2 {
 			fmt.Fprintln(os.Stdout, "Available setup tasks:\n- database\n- admin\n- server\n- tls\n-----------------\n- [all]")
+			os.Exit(1)
 		}
-		task := strings.ToLower(args[1])
+		task := strings.ToLower(args[2])
 		flags := args[2:]
 		setupRunner := &setup.Runner {
 			Tasks: []setup.Task{
 				tasks.Database{
 					Flags: flags,
 					Config: a.configuration(),
+					ConsoleWriter: os.Stdout,
 				},
 				tasks.Admin{
 					Flags: flags,
 					DatabaseFactory: func() (repository.TDSDatabase, error) {
 						pg := &a.configuration().Postgres
-						return postgres.Open(pg.Hostname, pg.Port, pg.DBName, pg.Username, pg.Password, pg.SSLMode)
+						p, err := postgres.Open(pg.Hostname, pg.Port, pg.DBName, pg.Username, pg.Password, pg.SSLMode)
+						if err != nil {
+							log.WithError(err).Error("failed to open postgres connection for setup task")
+							return nil, err
+						}
+						p.Migrate()
+						return p, nil
 					},
+					ConsoleWriter: os.Stdout,
 				},
 				tasks.Server{
 					Flags: flags,
 					Config: a.configuration(),
+					ConsoleWriter: os.Stdout,
 				},
 				tasks.TLS{
 					Flags: flags,
 					TLSCertFile: path.Join(a.ConfigDir, constants.TLSCertFile),
 					TLSKeyFile: path.Join(a.ConfigDir, constants.TLSKeyFile), 
+					ConsoleWriter: os.Stdout,
 				},
 			},
 			AskInput: false,
@@ -189,7 +209,7 @@ func (a *App) startServer() error {
 		}
 	}()
 
-	// TODO dispatch agent status checker goroutine
+	// TODO dispatch Service status checker goroutine
 	<-stop
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -202,16 +222,16 @@ func (a *App) startServer() error {
 
 func (a *App) start() error {
 	if s, _ := a.state(); s == constants.Stopped {
-		cmd := exec.Command(a.ExecutablePath, "run")
+		cmd := exec.Command(a.executablePath(), "run")
 		err := cmd.Start()
 		if err != nil {
-			log.WithError(err).Error("Failed to start tdagentd")
+			log.WithError(err).Error("Failed to start tdservice as a daemon")
 			return err
 		}
 		cmd.Process.Release()
-		fmt.Fprintln(a.consoleWriter(), "Started Threat Detection Agent")
+		fmt.Fprintln(a.consoleWriter(), "Started Threat Detection Service")
 	} else {
-		fmt.Fprintln(a.consoleWriter(), "Threat Detection Agent is already running")
+		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service is already running")
 	}
 	return nil
 }
@@ -219,13 +239,13 @@ func (a *App) start() error {
 func (a *App) stop() error {
 	if s, pid := a.state(); s == constants.Running {
 		if err := syscall.Kill(pid, syscall.SIGTERM); err != nil {
-			log.WithError(err).Error("Failed to terminate Threat Detection Agent with signal SIGTERM")
-			fmt.Fprintln(a.consoleWriter(), "Failed to stop Threat Detection Agent")
+			log.WithError(err).Error("Failed to terminate Threat Detection Service with signal SIGTERM")
+			fmt.Fprintln(a.consoleWriter(), "Failed to stop Threat Detection Service")
 			return err
 		}
-		fmt.Fprintln(a.consoleWriter(), "Threat Detection agent stopped")
+		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service stopped")
 	} else {
-		fmt.Fprintln(a.consoleWriter(), "Threat Detection Agent is already stopped")
+		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service is already stopped")
 	}
 	return nil
 }
@@ -250,9 +270,9 @@ func (a *App) state() (state constants.State, pid int) {
 func (a *App) status() error {
 	s, pid := a.state()
 	if s == constants.Running {
-		fmt.Fprintf(a.consoleWriter(), "Threat Detection Agent is running (PID: %d)\n", pid)
+		fmt.Fprintf(a.consoleWriter(), "Threat Detection Service is running (PID: %d)\n", pid)
 	} else {
-		fmt.Fprintln(a.consoleWriter(), "Threat Detection Agent is not running")
+		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service is not running")
 	}
 	return nil
 }

@@ -15,7 +15,8 @@ type PostgresDatabase struct {
 }
 
 func (pd *PostgresDatabase) Migrate() error {
-	pd.DB.AutoMigrate(types.Host{}, types.Report{})
+	pd.DB.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;`)
+	pd.DB.AutoMigrate(types.Host{}, types.Report{}, types.User{})
 	return nil
 }
 
@@ -40,9 +41,9 @@ func (pd *PostgresDatabase) Close() {
 func Open(host string, port int, dbname string, user string, password string, ssl bool) (*PostgresDatabase, error) {
 	var sslMode string
 	if ssl {
-		sslMode = "true"
+		sslMode = "require"
 	} else {
-		sslMode = "false"
+		sslMode = "disable"
 	}
 	var db *gorm.DB
 	var dbErr error

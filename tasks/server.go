@@ -2,16 +2,20 @@ package tasks
 
 import (
 	"flag"
+	"fmt"
 	"intel/isecl/lib/common/setup"
 	"intel/isecl/tdservice/config"
+	"io"
 )
 
 type Server struct {
-	Flags  []string
-	Config *config.Configuration
+	Flags         []string
+	Config        *config.Configuration
+	ConsoleWriter io.Writer
 }
 
 func (s Server) Run(c setup.Context) error {
+	fmt.Fprintln(s.ConsoleWriter, "Running server setup...")
 	defaultPort, err := c.GetenvInt("TDS_PORT", "threat detection service http port")
 	if err != nil {
 		defaultPort = 8443
@@ -22,6 +26,7 @@ func (s Server) Run(c setup.Context) error {
 	if err != nil {
 		return err
 	}
+	fmt.Fprintf(s.ConsoleWriter, "Using HTTPS port: %d\n", s.Config.Port)
 	return s.Config.Save()
 }
 
