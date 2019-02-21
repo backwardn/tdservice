@@ -3,7 +3,7 @@ package types
 import "time"
 
 type HostInfo struct {
-	Hostname string `json:"hostname"`
+	Hostname string `json:"hostname" gorm:"unique"`
 	Version  string `json:"version"`
 	Build    string `json:"build"`
 	OS       string `json:"os"`
