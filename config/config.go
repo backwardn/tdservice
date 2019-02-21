@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"intel/isecl/tdservice/constants"
 	"os"
 	"path"
@@ -30,11 +31,20 @@ type Configuration struct {
 
 var mu sync.Mutex
 
-var Global = &Configuration{}
+var global *Configuration
+
+func Global() *Configuration {
+	if global == nil {
+		global = Load(path.Join(constants.ConfigDir, constants.ConfigFile))
+	}
+	return global
+}
+
+var ErrNoConfigFile = errors.New("no config file")
 
 func (c *Configuration) Save() error {
 	if c.configFile == "" {
-		return nil
+		return ErrNoConfigFile
 	}
 	file, err := os.OpenFile(c.configFile, os.O_RDWR, 0)
 	if err != nil {
@@ -54,22 +64,14 @@ func (c *Configuration) Save() error {
 	return yaml.NewEncoder(file).Encode(c)
 }
 
-func Load(path string) (*Configuration, error) {
+func Load(path string) *Configuration {
 	var c Configuration
 	file, err := os.Open(path)
 	if err == nil {
 		defer file.Close()
 		yaml.NewDecoder(file).Decode(&c)
-		c.configFile = path
-		return &c, nil
 	}
-	return nil, err
-}
-
-func init() {
-	// load from config
-	g, err := Load(path.Join(constants.ConfigDir, constants.ConfigFile))
-	if err == nil {
-		Global = g
-	}
+	// file doesnt exist, create a new blank one
+	c.configFile = path
+	return &c
 }

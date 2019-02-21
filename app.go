@@ -35,6 +35,7 @@ import (
 type App struct {
 	ConfigDir      string
 	RunDir         string
+	DataDir 		string
 	ExecutablePath string
 	Config         *config.Configuration
 	ConsoleWriter  io.Writer
@@ -71,14 +72,35 @@ func (a *App) configuration() *config.Configuration {
 	if a.Config != nil {
 		return a.Config
 	}
-	return config.Global
+	return config.Global()
 }
 
 func (a *App) executablePath() string {
 	if a.ExecutablePath != "" {
 		return a.ExecutablePath
 	} 
-	return os.Args[0]
+	return path.Join(constants.ExecutableDir, "tdservice")
+}
+
+func (a *App) configDir() string {
+	if a.ConfigDir != "" {
+		return a.ConfigDir
+	}
+	return constants.ConfigDir
+}
+
+func (a *App) dataDir() string {
+	if a.DataDir != "" {
+		return a.DataDir
+	}
+	return constants.DataDir
+}
+
+func (a *App) runDir() string {
+	if a.RunDir != "" {
+		return a.RunDir
+	}
+	return constants.RunDir
 }
 
 func (a *App) Run(args []string) error {
@@ -89,6 +111,8 @@ func (a *App) Run(args []string) error {
 	//bin := args[0]
 	cmd := args[1]
 	switch cmd {
+	default:
+		a.printUsage()
 	case "run":
 		return a.startServer()
 	case "-help":
@@ -146,8 +170,8 @@ func (a *App) Run(args []string) error {
 				},
 				tasks.TLS{
 					Flags: flags,
-					TLSCertFile: path.Join(a.ConfigDir, constants.TLSCertFile),
-					TLSKeyFile: path.Join(a.ConfigDir, constants.TLSKeyFile), 
+					TLSCertFile: path.Join(a.configDir(), constants.TLSCertFile),
+					TLSKeyFile: path.Join(a.configDir(), constants.TLSKeyFile), 
 					ConsoleWriter: os.Stdout,
 				},
 			},
@@ -187,7 +211,7 @@ func (a *App) startServer() error {
 		for _, s := range setters {
 			s(r, tdsDB)
 		}
-	}(resource.SetHosts, resource.SetReports)
+	}(resource.SetHosts, resource.SetReports, resource.SetVersion)
 
 	// Setup signal handlers to gracefully handle termination
 	stop := make(chan os.Signal)
@@ -201,8 +225,8 @@ func (a *App) startServer() error {
 
 	// dispatch web server go routine
 	go func() {
-		tlsCert := path.Join(a.ConfigDir, constants.TLSCertFile)
-		tlsKey := path.Join(a.ConfigDir, constants.TLSKeyFile)
+		tlsCert := path.Join(a.configDir(), constants.TLSCertFile)
+		tlsKey := path.Join(a.configDir(), constants.TLSKeyFile)
 		if err := h.ListenAndServeTLS(tlsCert, tlsKey); err != nil {
 			log.WithError(err).Info("Failed to start HTTPS server")
 			stop <- syscall.SIGTERM
@@ -228,7 +252,13 @@ func (a *App) start() error {
 			log.WithError(err).Error("Failed to start tdservice as a daemon")
 			return err
 		}
+		pidFile := path.Join(a.runDir(), constants.PIDFile)
+		err = config.WritePidFile(pidFile, cmd.Process.Pid)
 		cmd.Process.Release()
+		if err != nil {
+			log.WithError(err).Error("failed to write pid file")
+			return err
+		}
 		fmt.Fprintln(a.consoleWriter(), "Started Threat Detection Service")
 	} else {
 		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service is already running")
@@ -251,16 +281,19 @@ func (a *App) stop() error {
 }
 
 func (a *App) state() (state constants.State, pid int) {
-	pidFile := path.Join(a.RunDir, constants.PIDFile)
+	pidFile := path.Join(a.runDir(), constants.PIDFile)
 	pid, err := config.CheckPidFile(pidFile)
 	if err != nil {
+		log.WithError(err).Debug("failed to check pid file")
 		return
 	}
 	p, err := os.FindProcess(pid)
 	if err != nil {
+		log.WithError(err).Error("failed to find process")
 		return
 	}
 	if err := p.Signal(syscall.Signal(0)); err != nil {
+		log.WithError(err).Error("failed to signal process")
 		return
 	}
 	state = constants.Running
@@ -278,9 +311,24 @@ func (a *App) status() error {
 }
 
 func (a *App) uninstall(keepConfig bool) {
-	os.Remove(a.ExecutablePath)
-	if !keepConfig {
-		os.RemoveAll(a.ConfigDir)
+	a.stop()
+	err := os.Remove(a.executablePath())
+	if err != nil {
+		log.WithError(err).Error("error removing executable")
 	}
-	os.RemoveAll(a.RunDir)
+	if !keepConfig {
+		err = os.RemoveAll(a.configDir())
+		if err != nil {
+			log.WithError(err).Error("error removing config dir")
+		}
+	}
+	err = os.RemoveAll(a.runDir())
+	if err != nil {
+		log.WithError(err).Error("error removing config dir")
+	}
+	err = os.RemoveAll(a.dataDir())
+	if err != nil {
+		log.WithError(err).Error("error removing data dir")
+	}
+	fmt.Fprintln(a.consoleWriter(), "Threat Detection Service uninstalled")
 }

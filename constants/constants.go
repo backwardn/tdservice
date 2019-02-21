@@ -1,6 +1,9 @@
 package constants
 
 const ConfigDir = "/etc/tdservice/"
+const ExecutableDir = "/usr/local/bin/"
+const RunDir = "/var/run/tdservice/"
+const DataDir = "/var/lib/tdservice/"
 const ConfigFile = "config.yml"
 
 const TLSCertFile = "cert.pem"

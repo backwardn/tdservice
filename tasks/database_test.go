@@ -19,7 +19,7 @@ func TestDatabaseSetup(t *testing.T) {
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)
-	assert.NoError(err)
+	assert.Equal(config.ErrNoConfigFile, err)
 	assert.Equal("hostname", c.Postgres.Hostname)
 	assert.Equal(5432, c.Postgres.Port)
 	assert.Equal("user", c.Postgres.Username)
@@ -42,7 +42,7 @@ func TestDatabaseSetupEnv(t *testing.T) {
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)
-	assert.NoError(err)
+	assert.Equal(config.ErrNoConfigFile, err)
 	assert.Equal("hostname", c.Postgres.Hostname)
 	assert.Equal(5432, c.Postgres.Port)
 	assert.Equal("user", c.Postgres.Username)

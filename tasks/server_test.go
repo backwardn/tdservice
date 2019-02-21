@@ -19,7 +19,7 @@ func TestServerSetup(t *testing.T) {
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)
-	assert.NoError(t, err)
+	assert.Equal(t, config.ErrNoConfigFile, err)
 	assert.Equal(t, 1337, c.Port)
 }
 
@@ -33,6 +33,6 @@ func TestServerSetupEnv(t *testing.T) {
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)
-	assert.NoError(t, err)
+	assert.Equal(t, config.ErrNoConfigFile, err)
 	assert.Equal(t, 1337, c.Port)
 }

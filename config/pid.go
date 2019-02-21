@@ -29,6 +29,7 @@ func CheckPidFile(path string) (pid int, err error) {
 // WritePidFile writes the specified pid to /var/run/threat-detection/tdagent.pid,
 // creating it if it doesnt exist
 func WritePidFile(path string, pid int) error {
+	log.WithField("pid", pid).Debug("writing pid file")
 	pidFile, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("failed to write pid file: %v", err)
