@@ -20,10 +20,15 @@ installer: tdservice
 	cp out/tdservice out/installer/tdservice
 	makeself out/installer out/tdservice-$(VERSION)-$(GITCOMMIT).bin "Threat Detection Service $(VERSION)" ./install.sh
 
-all: test installer
+docker: installer
+	cp dist/docker/entrypoint.sh out/entrypoint.sh && chmod +x out/entrypoint.sh
+	docker build -t isecl/tdservice:latest -f ./dist/docker/Dockerfile ./out
+	docker save isecl/tdservice:latest > ./out/docker-tdservice-$(VERSION)-$(GITCOMMIT).tar
+
+all: test docker
 
 
 clean:
-	rm cover.*
-	rm tdservice
+	rm -f cover.*
+	rm -f tdservice
 	rm -rf out/

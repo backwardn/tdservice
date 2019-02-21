@@ -20,7 +20,8 @@ echo Setting up Threat Detection Service Linux User...
 id -u tds 2> /dev/null || useradd tds
 
 echo Installing Threat Detection Service...
-# cp tdservice /usr/local/bin/tdservice
+
+cp tdservice /usr/local/bin/tdservice
 chmod +x /usr/local/bin/tdservice
 chmod +s /usr/local/bin/tdservice
 chown tds:tds /usr/local/bin/tdservice
