@@ -13,8 +13,9 @@ func TestDatabaseSetup(t *testing.T) {
 	assert := assert.New(t)
 	c := config.Configuration{}
 	s := Database{
-		Flags:  []string{"-db-host=hostname", "-db-port=5432", "-db-user=user", "-db-pass=password", "-db-name=tds_db"},
-		Config: &c,
+		Flags:         []string{"-db-host=hostname", "-db-port=5432", "-db-user=user", "-db-pass=password", "-db-name=tds_db"},
+		Config:        &c,
+		ConsoleWriter: os.Stdout,
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)
@@ -35,8 +36,9 @@ func TestDatabaseSetupEnv(t *testing.T) {
 	os.Setenv("TDS_DB_NAME", "tds_db")
 	c := config.Configuration{}
 	s := Database{
-		Flags:  nil,
-		Config: &c,
+		Flags:         nil,
+		Config:        &c,
+		ConsoleWriter: os.Stdout,
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)

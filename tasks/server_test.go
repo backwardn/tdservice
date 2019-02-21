@@ -13,8 +13,9 @@ import (
 func TestServerSetup(t *testing.T) {
 	c := config.Configuration{}
 	s := Server{
-		Flags:  []string{"-port=1337"},
-		Config: &c,
+		Flags:         []string{"-port=1337"},
+		Config:        &c,
+		ConsoleWriter: os.Stdout,
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)
@@ -26,8 +27,9 @@ func TestServerSetupEnv(t *testing.T) {
 	os.Setenv("TDS_PORT", "1337")
 	c := config.Configuration{}
 	s := Server{
-		Flags:  nil,
-		Config: &c,
+		Flags:         nil,
+		Config:        &c,
+		ConsoleWriter: os.Stdout,
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)

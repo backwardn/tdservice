@@ -39,9 +39,10 @@ func TestTlsSetup(t *testing.T) {
 	os.Remove(cert.Name())
 	os.Remove(key.Name())
 	s := TLS{
-		Flags:       nil,
-		TLSCertFile: cert.Name(),
-		TLSKeyFile:  key.Name(),
+		Flags:         nil,
+		TLSCertFile:   cert.Name(),
+		TLSKeyFile:    key.Name(),
+		ConsoleWriter: os.Stdout,
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)
@@ -54,9 +55,10 @@ func TestValidate(t *testing.T) {
 	cert, _ := ioutil.TempFile("", "cert")
 	key, _ := ioutil.TempFile("", "key")
 	s := TLS{
-		Flags:       nil,
-		TLSCertFile: cert.Name(),
-		TLSKeyFile:  key.Name(),
+		Flags:         nil,
+		TLSCertFile:   cert.Name(),
+		TLSKeyFile:    key.Name(),
+		ConsoleWriter: os.Stdout,
 	}
 	ctx := setup.Context{}
 	err := s.Run(ctx)

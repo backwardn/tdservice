@@ -6,6 +6,7 @@ import (
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/repository/mock"
 	"intel/isecl/tdservice/types"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,7 @@ func TestValidateAdmin(t *testing.T) {
 		DatabaseFactory: func() (repository.TDSDatabase, error) {
 			return m, nil
 		},
+		ConsoleWriter: os.Stdout,
 	}
 	ctx := setup.Context{}
 	err := task.Validate(ctx)
@@ -48,6 +50,7 @@ func TestCreateAdmin(t *testing.T) {
 		DatabaseFactory: func() (repository.TDSDatabase, error) {
 			return m, nil
 		},
+		ConsoleWriter: os.Stdout,
 	}
 	ctx := setup.Context{}
 	err := task.Run(ctx)
