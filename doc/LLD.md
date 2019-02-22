@@ -328,7 +328,7 @@ For example, if the `TDA` node is at https://tda.node-2.intel.com, place its pem
 
 ## Setup
 
-```console
+```bash
 > tdservice setup 
   Available setup tasks:
     - database
@@ -341,21 +341,21 @@ For example, if the `TDA` node is at https://tda.node-2.intel.com, place its pem
 
 ### Setup - Database
 
-```console
+```bash
 > tdservice setup database [-force] --db-host=postgres.com --db-port=5432 --db-username=admin --db-password=password --db-name=tds_db
 ```
 Environment variables `TDS_DB_HOSTNAME`, `TDS_DB_PORT`, `TDS_DB_USERNAME`, `TDS_DB_PASSWORD`, `TDS_DB_NAME` can be used instead of command line flags
 
 ### Setup - HTTP Server
 
-```console
+```bash
 > tdservice setup server --port=8443
 ```
 Environment variable `TDS_PORT` can be used instead of command line flags
 
 ### Setup - TLS
 
-```console
+```bash
 > tdservice setup tls [--force] [--hosts=intel.com,10.1.168.2]
 ```
 
@@ -368,7 +368,7 @@ Environment variable `TDS_TLS_HOSTS` can be used instead of command line flags
 
 ### Setup - Admin
 
-```console
+```bash
 > tdservice setup admin --admin-user=admin --admin-pass=password
 ```
 
@@ -378,7 +378,7 @@ This task can be used to create multiple admin-users, but if a duplicate usernam
 
 ## Start/Stop
 
-```console
+```bash
 > tdservice start
   Threat Detection Service started
 > tdservice stop
@@ -387,7 +387,7 @@ This task can be used to create multiple admin-users, but if a duplicate usernam
 
 ## Uninstall
 
-```console
+```bash
 > tdservice uninstall [--keep-config]
   Threat Detection Service uninstalled
 ```
@@ -395,7 +395,7 @@ Uninstalls Threat Detection Service, with optional flag to keep configuration
 
 ## Help
 
-```console
+```bash
 > tdservice (help|-h|-help)
   Usage: tdservice <command> <flags>
     Commands:
@@ -410,7 +410,7 @@ Uninstalls Threat Detection Service, with optional flag to keep configuration
 
 ## Version
 
-```console
+```bash
 > tdservice version
     Threat Detection Service v1.0.0 build 9cf83e2
 ```
