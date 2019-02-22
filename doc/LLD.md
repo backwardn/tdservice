@@ -24,7 +24,6 @@ The `Threat Detection Service` has two core functionalities:
 # API Endpoints
 
 ## Node Management
-------------------
 
 ### POST `/tds/hosts`
 Register an Agent to the Service. 
@@ -125,7 +124,6 @@ Example Response:
 Unregister node from `TDS`
 
 ## Reports
-------------------
 
 ### POST `/tds/reports`
 Create a new threat detection report event.
@@ -292,7 +290,6 @@ Get a single report by its unique identifier
 ```
 
 ## Configuration and Heuristics
-------------------
 
 API's for pushing configuration and heuristics stubbed out until Phase 2
 
@@ -330,6 +327,7 @@ For example, if the `TDA` node is at https://tda.node-2.intel.com, place its pem
 # Command Line Operations
 
 ## Setup
+
 ```console
 > tdservice setup 
   Available setup tasks:
