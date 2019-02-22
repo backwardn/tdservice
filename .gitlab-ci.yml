@@ -20,6 +20,7 @@ stages:
  - build
  - test
  - docs
+ - pages
 
 compile:
   stage: build
@@ -47,8 +48,15 @@ test:
     paths:
       - "cover.html"
 
-pages:
+lld:
   stage: docs
+  tags:
+    - go
+  script:
+    - curl --noproxy "*" --header Content-Type:application/json --data "$(printf '{"text":"%s", "gfm":true}' "$(cat doc/LLD.md)")" https://gitlab.devtools.intel.com/api/v4/markdown > public/LLD.html
+
+pages:
+  stage: pages
   tags:
     - go
   dependencies:
