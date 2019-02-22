@@ -54,6 +54,9 @@ lld:
     - go
   script:
     - curl --noproxy "*" --header Content-Type:application/json --data "$(printf '{"text":"%s", "gfm":true}' "$(cat doc/LLD.md)")" https://gitlab.devtools.intel.com/api/v4/markdown > public/LLD.html
+  artifacts:
+    paths:
+      - LLD.html
 
 pages:
   stage: pages
@@ -64,6 +67,7 @@ pages:
   script:
     - mkdir -p public/
     - cp cover.html public/cover.html
+    - cp LLD.html public/LLD.html
   artifacts:
     paths:
     - public
