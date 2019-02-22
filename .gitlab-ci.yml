@@ -54,7 +54,7 @@ lld:
     - go
   script:
     - apt update && apt install -y jq
-    - curl --noproxy "*" --header Content-Type:application/json --data $(jq --slurp --raw-input '{"text":"\(.)", "gfm":true}' < /doc/LLD.md) https://gitlab.devtools.intel.com/markdown > LLD.html
+    - curl --noproxy "*" --header Content-Type:application/json --data $(jq --slurp --raw-input '{"text":"\(.)", "gfm":true}' < ./doc/LLD.md) https://gitlab.devtools.intel.com/api/v4/markdown > LLD.html
   artifacts:
     paths:
       - LLD.html
