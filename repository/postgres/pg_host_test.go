@@ -17,7 +17,7 @@ func dialDatabase(t *testing.T) *PostgresDatabase {
 	g, err := gorm.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
 		"localhost", 5432, "runner", "pgdb", "test", "disable"))
 	if err != nil {
-		t.SkipNow()
+		t.FailNow()
 	}
 	return &PostgresDatabase{DB: g}
 }
