@@ -49,12 +49,13 @@ test:
       - "cover.html"
 
 lld:
+  image: ubuntu:latest
   stage: docs
   tags:
     - go
   script:
-    - apt update && apt install -y jq
-    - curl --noproxy "*" --header Content-Type:application/json --data $(jq --slurp --raw-input '{"text":"\(.)", "gfm":true}' < ./doc/LLD.md) https://gitlab.devtools.intel.com/api/v4/markdown > LLD.html
+    - apt update && apt install -y pandoc
+    - pandoc -f gfm -t html5 doc/LLD.md -o LLD.html
   artifacts:
     paths:
       - LLD.html
