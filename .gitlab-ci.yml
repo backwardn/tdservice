@@ -54,9 +54,7 @@ pages:
   dependencies:
     - test
   script:
-    - godoc -http localhost:8080 &
-    - wget -r -np -N -E -p -k http://localhost:8080/pkg/
-    - mv localhost*/ public/
+    - mkdir -p public/
     - cp cover.html public/cover.html
   artifacts:
     paths:
