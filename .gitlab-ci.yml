@@ -29,6 +29,8 @@ compile:
 
 test:
   stage: test
+  services:
+    - postgres:latest
   tags: 
     - go
   script:

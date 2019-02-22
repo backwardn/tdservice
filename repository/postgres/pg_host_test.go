@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 	"testing"
 
@@ -19,19 +20,23 @@ func dialDatabase(t *testing.T) *PostgresDatabase {
 	return &PostgresDatabase{DB: g}
 }
 
+func createHost(hostname string, hr repository.HostRepository) (*types.Host, error) {
+	host := types.Host{}
+	host.Hostname = hostname
+	host.OS = "linux"
+	host.Status = "online"
+	host.Version = "1.0"
+	host.Build = "1234"
+	return hr.Create(host)
+}
+
 func TestHostCreate(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
 	db.DB.DropTableIfExists(types.Host{})
 	db.Migrate()
-	host := types.Host{}
-	host.Hostname = "10.0.0.1"
-	host.OS = "linux"
-	host.Status = "online"
-	host.Version = "1.0"
-	host.Build = "1234"
-	created, err := db.HostRepository().Create(host)
+	created, err := createHost("10.0.0.1", db.HostRepository())
 	assert.NotEmpty(created.ID)
 	assert.NoError(err)
 }
@@ -42,17 +47,11 @@ func TestHostCreateDuplicate(t *testing.T) {
 	// If you somehow run this on production, god bless your poor soul
 	db.DB.DropTableIfExists(types.Host{})
 	db.Migrate()
-	host := types.Host{}
-	host.Hostname = "10.0.0.1"
-	host.OS = "linux"
-	host.Status = "online"
-	host.Version = "1.0"
-	host.Build = "1234"
-	created, err := db.HostRepository().Create(host)
+	created, err := createHost("10.0.0.1", db.HostRepository())
 	assert.NotEmpty(created.ID)
 	assert.NoError(err)
 
-	_, err = db.HostRepository().Create(host)
+	_, err = createHost("10.0.0.1", db.HostRepository())
 	assert.Error(err)
 }
 
@@ -62,13 +61,7 @@ func TestHostRetrieve(t *testing.T) {
 	// If you somehow run this on production, god bless your poor soul
 	db.DB.DropTableIfExists(types.Host{})
 	db.Migrate()
-	host := types.Host{}
-	host.Hostname = "10.0.0.1"
-	host.OS = "linux"
-	host.Status = "online"
-	host.Version = "1.0"
-	host.Build = "1234"
-	created, err := db.HostRepository().Create(host)
+	created, err := createHost("10.0.0.1", db.HostRepository())
 	assert.NotEmpty(created.ID)
 	assert.NoError(err)
 
@@ -84,18 +77,11 @@ func TestHostRetrieveAll(t *testing.T) {
 	// If you somehow run this on production, god bless your poor soul
 	db.DB.DropTableIfExists(types.Host{})
 	db.Migrate()
-	host := types.Host{}
-	host.Hostname = "10.0.0.1"
-	host.OS = "linux"
-	host.Status = "online"
-	host.Version = "1.0"
-	host.Build = "1234"
-	created, err := db.HostRepository().Create(host)
+	created, err := createHost("10.0.0.1", db.HostRepository())
 	assert.NotEmpty(created.ID)
 	assert.NoError(err)
 
-	host.Hostname = "10.0.0.2"
-	created2, err := db.HostRepository().Create(host)
+	created2, err := createHost("10.0.0.2", db.HostRepository())
 	assert.NotEmpty(created2.ID)
 	assert.NoError(err)
 
