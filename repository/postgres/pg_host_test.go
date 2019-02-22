@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
+	"os"
 	"testing"
 
 	"github.com/jinzhu/gorm"
@@ -14,8 +15,24 @@ import (
 )
 
 func dialDatabase(t *testing.T) *PostgresDatabase {
+	hostname := os.Getenv("POSTGRES_HOSTNAME")
+	dbname := os.Getenv("POSTGRES_DB")
+	user := os.Getenv("POSTGRES_USER")
+	pass := os.Getenv("POSTGRE_PASSWORD")
+	if hostname == "" {
+		hostname = "localhost"
+	}
+	if dbname == "" {
+		dbname = "pgdb"
+	}
+	if user == "" {
+		user = "runner"
+	}
+	if pass == "" {
+		pass = "test"
+	}
 	g, err := gorm.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
-		"localhost", 5432, "runner", "pgdb", "test", "disable"))
+		hostname, 5432, user, dbname, pass, "disable"))
 	if err != nil {
 		t.FailNow()
 	}

@@ -32,6 +32,7 @@ test:
   services:
     - postgres:latest
   variables:
+    POSTGRES_HOSTNAME: postgres
     POSTGRES_DB: pgdb
     POSTGRES_USER: runner
     POSTGRES_PASSWORD: test
