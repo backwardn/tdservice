@@ -49,6 +49,8 @@ test:
 
 pages:
   stage: docs
+  tags:
+    - go
   dependencies:
     - test
   script:
