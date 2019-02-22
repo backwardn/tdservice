@@ -53,7 +53,8 @@ lld:
   tags:
     - go
   script:
-    - curl --noproxy "*" --header Content-Type:application/json --data "$(printf '{"text":"%s", "gfm":true}' "$(cat doc/LLD.md)")" https://gitlab.devtools.intel.com/api/v4/markdown > LLD.html
+    - apt update && apt install jq
+    - jq --slurp --raw-input '{"text": "\(.)", "gfm": true}' < /doc/LLD.md | curl --noproxy "*" --header Content-Type:application/json --data @- https://gitlab.devtools..com/markdown > LLD.html
   artifacts:
     paths:
       - LLD.html
