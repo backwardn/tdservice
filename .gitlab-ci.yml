@@ -54,7 +54,7 @@ lld:
     - go
   script:
     - apt update && apt install -y pandoc
-    - pandoc --standalone --css pandoc -f markdown_github -t html5 doc/LLD.md -o LLD.html
+    - pandoc --standalone --css pandoc.css -f markdown_github -t html5 doc/LLD.md -o LLD.html
   artifacts:
     paths:
       - LLD.html
