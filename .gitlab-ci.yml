@@ -31,6 +31,10 @@ test:
   stage: test
   services:
     - postgres:latest
+  variables:
+    POSTGRES_DB: pgdb
+    POSTGRES_USER: runner
+    POSTGRES_PASSWORD: test
   tags: 
     - go
   script:
