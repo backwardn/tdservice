@@ -53,7 +53,7 @@ lld:
   tags:
     - go
   script:
-    - apt update && apt install jq
+    - apt update && apt install -y jq
     - curl --noproxy "*" --header Content-Type:application/json --data $(jq --slurp --raw-input '{"text":"\(.)", "gfm":true}' < /doc/LLD.md) https://gitlab.devtools..com/markdown > LLD.html
   artifacts:
     paths:
