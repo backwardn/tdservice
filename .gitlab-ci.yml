@@ -19,6 +19,7 @@ variables:
 stages:
  - build
  - test
+ - docs
 
 compile:
   stage: build
@@ -47,6 +48,7 @@ test:
       - "cover.html"
 
 pages:
+  stage: docs
   dependencies:
     - test
   script:
