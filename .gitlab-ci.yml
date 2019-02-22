@@ -64,7 +64,7 @@ pages:
     - go
   dependencies:
     - test
-    - docs
+    - lld
   script:
     - mkdir -p public/
     - cp cover.html public/cover.html
