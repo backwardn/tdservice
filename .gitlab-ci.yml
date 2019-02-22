@@ -49,7 +49,6 @@ test:
       - "cover.html"
 
 lld:
-  image: ubuntu:latest
   stage: docs
   tags:
     - go
