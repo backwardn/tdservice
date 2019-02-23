@@ -20,7 +20,6 @@ stages:
  - build
  - test
  - dist
- - docs
  - pages
 
 compile:
@@ -60,7 +59,7 @@ installer:
       - "out/tdservice-*.bin"
 
 lld:
-  stage: docs
+  stage: dist
   tags:
     - go
   script:
