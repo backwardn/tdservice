@@ -19,6 +19,7 @@ variables:
 stages:
  - build
  - test
+ - dist
  - docs
  - pages
 
@@ -47,6 +48,16 @@ test:
   artifacts:
     paths:
       - "cover.html"
+
+installer:
+  stage: dist
+  tags:
+    - go
+  script:
+    - make installer
+  artifacts:
+    paths:
+      - "out/tdservice-*.bin"
 
 lld:
   stage: docs
