@@ -53,6 +53,7 @@ installer:
   tags:
     - go
   script:
+    - apt update && apt install -y makeself
     - make installer
   artifacts:
     paths:
