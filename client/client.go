@@ -71,18 +71,13 @@ func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
 	return &created, nil
 }
 
-func (c *Client) AddReport(r types.Report) (*types.Report, error) {
+func (c *Client) AddReportRaw(report string) (*types.Report, error) {
 	reports, err := c.resolvePath("/reports")
 	if err != nil {
 		return nil, err
 	}
-	// fix this as well
-	payload, err := json.Marshal(&r)
-	if err != nil {
-		return nil, err
-	}
 
-	req, _ := http.NewRequest(http.MethodPost, reports, bytes.NewBuffer(payload))
+	req, _ := http.NewRequest(http.MethodPost, reports, bytes.NewBufferString(report))
 	req.Header.Set("Content-Type", "application/json")
 	rsp, err := c.dispatchRequest(req)
 	if err != nil {
@@ -91,11 +86,20 @@ func (c *Client) AddReport(r types.Report) (*types.Report, error) {
 	if rsp.StatusCode != http.StatusCreated {
 		return nil, err
 	}
-
 	var created types.Report
 	err = json.NewDecoder(rsp.Body).Decode(&created)
 	if err != nil {
 		return nil, err
 	}
 	return &created, nil
+}
+
+func (c *Client) AddReport(r types.Report) (*types.Report, error) {
+	// fix this as well
+	payload, err := json.Marshal(&r)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.AddReportRaw(string(payload))
 }
