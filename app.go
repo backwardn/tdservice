@@ -141,7 +141,7 @@ func (a *App) Run(args []string) error {
 			os.Exit(1)
 		}
 		task := strings.ToLower(args[2])
-		flags := args[2:]
+		flags := args[3:]
 		setupRunner := &setup.Runner {
 			Tasks: []setup.Task{
 				tasks.Database{

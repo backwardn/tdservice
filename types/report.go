@@ -1,10 +1,7 @@
 package types
 
 import (
-	"encoding/json"
 	"time"
-
-	"github.com/jinzhu/gorm"
 
 	"github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -34,9 +31,4 @@ type Report struct {
 	Error         struct {
 		Description string `json:"description"`
 	} `json:"error,omitempty"`
-}
-
-func (r *Report) BeforeCreate(scope *gorm.Scope) (err error) {
-	r.DetectionJSON.RawMessage, err = json.Marshal(r.Detection)
-	return
 }
