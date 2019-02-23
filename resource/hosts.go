@@ -44,7 +44,8 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 			return err
 		}
 		// add the host
-		// the server, on a separate go routine, will periodically ping all registered hosts to update their status
+		// the server, on a separate go routine, will periodically ping all registered hosts to update their status, for now, assume online
+		h.Status = "online"
 		created, err := db.HostRepository().Create(h)
 		if err != nil {
 			return err
