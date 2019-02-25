@@ -1,6 +1,7 @@
 package main
 
 import (
+	"intel/isecl/tdservice/version"
 	"intel/isecl/tdservice/middleware"
 	"strings"
 	"intel/isecl/tdservice/tasks"
@@ -135,6 +136,8 @@ func (a *App) Run(args []string) error {
 		flag.CommandLine.Parse(args[2:])
 		a.uninstall(keepConfig)
 		os.Exit(0)
+	case "version":
+		fmt.Fprintf(a.consoleWriter(), "Threat Detection Service %s-%s\n", version.Version, version.GitHash)
 	case "setup": 
 		if len(args) <= 2 {
 			fmt.Fprintln(os.Stdout, "Available setup tasks:\n- database\n- admin\n- server\n- tls\n-----------------\n- [all]")

@@ -10,7 +10,7 @@ import (
 )
 
 func SetVersion(r *mux.Router, db repository.TDSDatabase) {
-	r.Handle("/version", getVersion())
+	r.Handle("/version", getVersion()).Methods("GET")
 }
 
 func getVersion() http.HandlerFunc {

@@ -1,0 +1,38 @@
+version: "3.6"
+services:
+   tds-pg-db:
+      image: postgres:latest
+      command: postgres -c 'max_connections=400' -c 'shared_buffers=400MB'
+      volumes:
+         - tds-pgdata-volume:/var/lib/postgresql/data
+      environment:
+         POSTGRES_DB: tds
+         POSTGRES_USER: runner
+         POSTGRES_PASSWORD: test
+
+   tdservice:
+      image: isecl/tdservice:latest
+      hostname: tdservice
+      depends_on:
+         - "tds-pg-db"
+      ports:
+         - 8443:8443
+
+      environment:
+         TDS_DB_HOSTNAME: tds-pg-db
+         TDS_DB_NAME: tds
+         TDS_DB_PORT: 5432
+         TDS_DB_USERNAME: runner
+         TDS_DB_PASSWORD: test
+         TDS_ADMIN_USERNAME: admin
+         TDS_ADMIN_PASSWORD: password
+        #
+
+      volumes:
+         - tds-config-volume:/etc/tdservice
+         - tds-log-volume:/var/log/tdservice
+
+volumes:
+   tds-config-volume:
+   tds-pgdata-volume:
+   tds-log-volume:

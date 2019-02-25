@@ -28,6 +28,9 @@ func NewBasicAuth(u repository.UserRepository) mux.MiddlewareFunc {
 					return
 				}
 				next.ServeHTTP(w, r)
+			} else {
+				log.Info("No Basic Auth provided")
+				w.WriteHeader(http.StatusUnauthorized)
 			}
 		})
 	}

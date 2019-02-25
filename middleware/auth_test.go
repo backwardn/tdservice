@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"intel/isecl/tdservice/repository/mock"
 	"intel/isecl/tdservice/types"
 	"net/http"
@@ -17,8 +18,11 @@ import (
 func setupRouter() *mux.Router {
 	mockRepo := &mock.MockUserRepository{
 		RetrieveFunc: func(u types.User) (*types.User, error) {
-			u.PasswordHash, _ = bcrypt.GenerateFromPassword([]byte("FOOBAR"), 10)
-			return &u, nil
+			if u.Name == "username" {
+				u.PasswordHash, _ = bcrypt.GenerateFromPassword([]byte("FOOBAR"), 10)
+				return &u, nil
+			}
+			return nil, errors.New("no user")
 		},
 	}
 	m := NewBasicAuth(mockRepo)
@@ -47,6 +51,25 @@ func TestBasicAuthFail(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/foo", nil)
 	req.SetBasicAuth("username", "DEFINITELY NOT THE RIGHT PASSWORD")
+	r.ServeHTTP(recorder, req)
+	assert.Equal(http.StatusUnauthorized, recorder.Code)
+}
+
+func TestBasicAuthWrongUser(t *testing.T) {
+	assert := assert.New(t)
+	r := setupRouter()
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/foo", nil)
+	req.SetBasicAuth("DEFINITELY NOT THE RIGHT USER", "DEFINITELY NOT THE RIGHT PASSWORD")
+	r.ServeHTTP(recorder, req)
+	assert.Equal(http.StatusUnauthorized, recorder.Code)
+}
+
+func TestNoBasicAuth(t *testing.T) {
+	assert := assert.New(t)
+	r := setupRouter()
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/foo", nil)
 	r.ServeHTTP(recorder, req)
 	assert.Equal(http.StatusUnauthorized, recorder.Code)
 }

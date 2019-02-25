@@ -61,7 +61,7 @@ func (a Admin) Validate(c setup.Context) error {
 	// but as it stands only type of user is an admin user
 	db, err := a.DatabaseFactory()
 	if err != nil {
-		log.WithError(err).Error("failed to open database")
+		log.WithError(err).Error("admin setup: failed to open database")
 		return err
 	}
 	defer db.Close()
