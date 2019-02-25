@@ -43,7 +43,7 @@ func (c *Client) dispatchRequest(req *http.Request) (*http.Response, error) {
 }
 
 func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
-	hosts, err := c.resolvePath("/hosts")
+	hosts, err := c.resolvePath("hosts")
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
 }
 
 func (c *Client) AddReportRaw(report string) (*types.Report, error) {
-	reports, err := c.resolvePath("/reports")
+	reports, err := c.resolvePath("reports")
 	if err != nil {
 		return nil, err
 	}
