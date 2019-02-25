@@ -2,6 +2,7 @@ package resource
 
 import (
 	"encoding/json"
+	"errors"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 	"net/http"
@@ -28,6 +29,10 @@ func createReport(db repository.TDSDatabase) errorHandlerFunc {
 		if err != nil {
 			log.WithError(err).Error("failed to decode input body as types.Report")
 			return err
+		}
+		if report.HostID == "" {
+			log.Error("report is not associated with a HostID")
+			return errors.New("report is not associated with a HostID")
 		}
 		created, err := db.ReportRepository().Create(report)
 
