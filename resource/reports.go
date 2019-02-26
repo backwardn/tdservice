@@ -3,7 +3,6 @@ package resource
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 	"net/http"
