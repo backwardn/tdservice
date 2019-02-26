@@ -55,9 +55,28 @@ installer:
   script:
     - apt update && apt install -y makeself
     - make installer
+    - cp ./doc/openapi.yml ./out/openapi.yml
   artifacts:
     paths:
       - "out/tdservice-*.bin"
+      - "out/openapi.yml"
+
+docker:
+  stage: dist
+  tags: 
+    - go
+    - docker
+  script:
+    - curl -sSL https://get.docker.com/ | sh
+    - apt-get update && apt-get install -y makeself
+    - make docker
+    - cp ./dist/docker/docker-compose.yml ./out/docker-compose.yml
+    - cp ./docs/openapi.yml ./out/openapi.yml
+  artifacts:
+    paths:
+      - "out/*.tar"
+      - "out/docker-compose.yml"
+      - "out/openapi.yml"
 
 lld:
   stage: dist

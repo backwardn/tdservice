@@ -6,9 +6,9 @@ services:
       volumes:
          - tds-pgdata-volume:/var/lib/postgresql/data
       environment:
-         POSTGRES_DB: tds
-         POSTGRES_USER: runner
-         POSTGRES_PASSWORD: test
+         POSTGRES_DB: ${TDS_DB_NAME:-tds}
+         POSTGRES_USER: ${TDS_DB_USERNAME:-runner}
+         POSTGRES_PASSWORD: ${TDS_DB_PASSWORD:-test}
 
    tdservice:
       image: isecl/tdservice:latest
@@ -20,12 +20,12 @@ services:
 
       environment:
          TDS_DB_HOSTNAME: tds-pg-db
-         TDS_DB_NAME: tds
+         TDS_DB_NAME: ${TDS_DB_NAME:-tds}
          TDS_DB_PORT: 5432
-         TDS_DB_USERNAME: runner
-         TDS_DB_PASSWORD: test
-         TDS_ADMIN_USERNAME: admin
-         TDS_ADMIN_PASSWORD: password
+         TDS_DB_USERNAME: ${TDS_DB_USERNAME:-runner}
+         TDS_DB_PASSWORD: ${TDS_DB_PASSWORD:-test}
+         TDS_ADMIN_USERNAME: ${TDS_ADMIN_USERNAME:-admin}
+         TDS_ADMIN_PASSWORD: ${TDS_ADMIN_PASSWORD:-password}
         #
 
       volumes:

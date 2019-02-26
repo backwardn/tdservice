@@ -248,6 +248,7 @@ func (a *App) startServer() error {
 		}
 	}()
 
+	fmt.Fprintln(a.consoleWriter(), "Threat Detection Service is running")
 	// TODO dispatch Service status checker goroutine
 	<-stop
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
