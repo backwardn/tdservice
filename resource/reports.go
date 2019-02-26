@@ -35,7 +35,6 @@ func createReport(db repository.TDSDatabase) errorHandlerFunc {
 			log.Error("report is not associated with a HostID")
 			return errors.New("report is not associated with a HostID")
 		}
-		fmt.Println("report!", report)
 		log.WithField("report", report).Info("creating report")
 		created, err := db.ReportRepository().Create(report)
 
