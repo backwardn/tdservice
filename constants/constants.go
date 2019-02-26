@@ -4,6 +4,10 @@ const ConfigDir = "/etc/tdservice/"
 const ExecutableDir = "/usr/local/bin/"
 const RunDir = "/var/run/tdservice/"
 const DataDir = "/var/lib/tdservice/"
+const LogDir = "/var/log/tdservice/"
+
+const LogFile = "tdservice.log"
+const HTTPLogFile = "http.log"
 const ConfigFile = "config.yml"
 
 const TLSCertFile = "cert.pem"

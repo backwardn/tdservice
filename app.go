@@ -104,11 +104,23 @@ func (a *App) runDir() string {
 	return constants.RunDir
 }
 
+func (a *App) configureLogs() {
+	log.SetOutput(io.MultiWriter(os.Stderr, a.logWriter()))
+	log.SetLevel(a.configuration().LogLevel)
+
+	// override golang logger
+	w := log.StandardLogger().WriterLevel(a.configuration().LogLevel)
+	stdlog.SetOutput(w)
+}
+
 func (a *App) Run(args []string) error {
+	a.configureLogs()
+
 	if len(args) < 2 {
 		a.printUsage()
 		os.Exit(1)
 	}
+	
 	//bin := args[0]
 	cmd := args[1]
 	switch cmd {
