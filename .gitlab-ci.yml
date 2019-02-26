@@ -71,7 +71,7 @@ docker:
     - apt-get update && apt-get install -y makeself
     - make docker
     - cp ./dist/docker/docker-compose.yml ./out/docker-compose.yml
-    - cp ./docs/openapi.yml ./out/openapi.yml
+    - cp ./doc/openapi.yml ./out/openapi.yml
   artifacts:
     paths:
       - "out/*.tar"
