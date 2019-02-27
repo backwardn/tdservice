@@ -42,6 +42,27 @@ func (c *Client) dispatchRequest(req *http.Request) (*http.Response, error) {
 	return c.httpClient().Do(req)
 }
 
+func (c *Client) GetHost(id string) (*types.Host, error) {
+	hosts, err := c.resolvePath("hosts/" + id)
+	if err != nil {
+		return nil, err
+	}
+	req, _ := http.NewRequest(http.MethodGet, hosts, nil)
+	rsp, err := c.dispatchRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	if rsp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to retrieve host with id %s: HTTP Code: %d", id, rsp.StatusCode)
+	}
+	var fetched types.Host
+	err = json.NewDecoder(rsp.Body).Decode(&fetched)
+	if err != nil {
+		return nil, err
+	}
+	return &fetched, nil
+}
+
 func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
 	hosts, err := c.resolvePath("hosts")
 	if err != nil {
