@@ -261,73 +261,33 @@ func (a *App) startServer() error {
 }
 
 func (a *App) start() error {
-	if s, _ := a.state(); s == constants.Stopped {
-		cmd := exec.Command(a.executablePath(), "run")
-		err := cmd.Start()
-		if err != nil {
-			log.WithError(err).Error("Failed to start tdservice as a daemon")
-			return err
-		}
-		pidFile := path.Join(a.runDir(), constants.PIDFile)
-		err = config.WritePidFile(pidFile, cmd.Process.Pid)
-		cmd.Process.Release()
-		if err != nil {
-			log.WithError(err).Error("failed to write pid file")
-			return err
-		}
-		fmt.Fprintln(a.consoleWriter(), "Started Threat Detection Service")
-	} else {
-		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service is already running")
+	fmt.Fprintln(a.consoleWriter(), `Forwarding to "systemctl start tdservice"`)
+	systemctl, err := exec.LookPath("systemctl")
+	if err != nil {
+		return err
 	}
-	return nil
+	return syscall.Exec(systemctl, []string{"systemctl", "start", "tdservice"}, os.Environ())
 }
 
 func (a *App) stop() error {
-	if s, pid := a.state(); s == constants.Running {
-		if err := syscall.Kill(pid, syscall.SIGTERM); err != nil {
-			log.WithError(err).Error("Failed to terminate Threat Detection Service with signal SIGTERM")
-			fmt.Fprintln(a.consoleWriter(), "Failed to stop Threat Detection Service")
-			return err
-		}
-		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service stopped")
-	} else {
-		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service is already stopped")
-	}
-	return nil
-}
-
-func (a *App) state() (state constants.State, pid int) {
-	pidFile := path.Join(a.runDir(), constants.PIDFile)
-	pid, err := config.CheckPidFile(pidFile)
+	fmt.Fprintln(a.consoleWriter(), `Forwarding to "systemctl stop tdservice"`)
+	systemctl, err := exec.LookPath("systemctl")
 	if err != nil {
-		log.WithError(err).Debug("failed to check pid file")
-		return
+		return err
 	}
-	p, err := os.FindProcess(pid)
-	if err != nil {
-		log.WithError(err).Error("failed to find process")
-		return
-	}
-	if err := p.Signal(syscall.Signal(0)); err != nil {
-		log.WithError(err).Error("failed to signal process")
-		return
-	}
-	state = constants.Running
-	return
+	return syscall.Exec(systemctl, []string{"systemctl", "stop", "tdservice"}, os.Environ())
 }
 
 func (a *App) status() error {
-	s, pid := a.state()
-	if s == constants.Running {
-		fmt.Fprintf(a.consoleWriter(), "Threat Detection Service is running (PID: %d)\n", pid)
-	} else {
-		fmt.Fprintln(a.consoleWriter(), "Threat Detection Service is not running")
+	fmt.Fprintln(a.consoleWriter(), `Forwarding to "systemctl status tdservice"`)
+	systemctl, err := exec.LookPath("systemctl")
+	if err != nil {
+		return err
 	}
-	return nil
+	return syscall.Exec(systemctl, []string{"systemctl", "status", "tdservice"}, os.Environ())
 }
 
 func (a *App) uninstall(keepConfig bool) {
-	a.stop()
 	err := os.Remove(a.executablePath())
 	if err != nil {
 		log.WithError(err).Error("error removing executable")
@@ -347,4 +307,5 @@ func (a *App) uninstall(keepConfig bool) {
 		log.WithError(err).Error("error removing data dir")
 	}
 	fmt.Fprintln(a.consoleWriter(), "Threat Detection Service uninstalled")
+	a.stop()
 }
