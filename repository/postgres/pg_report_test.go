@@ -15,7 +15,7 @@ func TestReportCreateRetrieve(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
-	db.DB.DropTableIfExists(types.Host{}, types.Report{})
+	db.DB.Exec("DROP TABLE if exists hosts,reports cascade;")
 	db.Migrate()
 
 	// create a host to associate it with
@@ -47,11 +47,28 @@ func TestReportCreateRetrieve(t *testing.T) {
 	assert.Len(all, 2)
 }
 
+func TestCreateReportBadHost(t *testing.T) {
+	db := dialDatabase(t)
+	assert := assert.New(t)
+	// If you somehow run this on production, god bless your poor soul
+	db.DB.Exec("DROP TABLE if exists hosts,reports cascade;")
+	db.Migrate()
+
+	// There is no host associated with the id
+
+	report := types.Report{}
+	report.Detection.PID = 1
+	report.HostID = "eb6af396-361b-4d22-b27b-56bc8290d334"
+
+	_, err := db.ReportRepository().Create(report)
+	assert.Error(err)
+}
+
 func TestReportRetrieveByFilter(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
-	db.DB.DropTableIfExists(types.Host{}, types.Report{})
+	db.DB.Exec("DROP TABLE if exists hosts,reports cascade;")
 	db.Migrate()
 
 	// create a host to associate it with

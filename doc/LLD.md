@@ -305,10 +305,13 @@ There are two modes of installation:
 The daemon will create and use the following files on the OS:
 
 1. /var/run/tdservice/tdservice.pid (PID file to track daemon)
-2. /etc//tdservice/config.yaml (Configuration)
-3. /usr/*/bin/tdservice (executable binary)
-4. /etc/tdservice/key.pem (TLS key)
-5. /etc/tdservice/cert.pem (TLS cert)
+2. /var/log/tdservice/tdservice.log
+3. /var/log/tdservice/http.log
+4. /var/lib/tdservice/* (misc files)
+5. /etc//tdservice/config.yaml (Configuration)
+6. /usr/*/bin/tdservice (executable binary)
+7. /etc/tdservice/key.pem (TLS key)
+8. /etc/tdservice/cert.pem (TLS cert)
 
 ## Container Installation
 

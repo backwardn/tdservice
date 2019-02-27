@@ -47,7 +47,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Host'
     post:
-      summary: Create host
+      summary: Create host (Internal usage only)
       description: Create a new host entry. Hostnames must be unique across different hosts.
       tags:
         - Hosts
@@ -144,7 +144,7 @@ paths:
                   $ref: '#/components/schemas/Report'
     post:
       description: Create a new report
-      summary: Create Report
+      summary: Create Report (Internal usage only)
       tags:
         - Reports
       requestBody:

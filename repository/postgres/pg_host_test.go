@@ -34,6 +34,7 @@ func dialDatabase(t *testing.T) *PostgresDatabase {
 	g, err := gorm.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
 		hostname, 5432, user, dbname, pass, "disable"))
 	if err != nil {
+		t.Log("Failed to dial db", err)
 		t.FailNow()
 	}
 	return &PostgresDatabase{DB: g}
@@ -53,7 +54,7 @@ func TestHostCreate(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
-	db.DB.DropTableIfExists(types.Host{})
+	db.DB.Exec("DROP TABLE if exists  hosts cascade;")
 	db.Migrate()
 	created, err := createHost("10.0.0.1", db.HostRepository())
 	assert.NotEmpty(created.ID)
@@ -64,13 +65,13 @@ func TestHostCreateDuplicate(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
-	db.DB.DropTableIfExists(types.Host{})
+	db.DB.Exec("DROP TABLE if exists  hosts cascade;")
 	db.Migrate()
-	created, err := createHost("10.0.0.1", db.HostRepository())
+	created, err := createHost("10.0.0.2", db.HostRepository())
 	assert.NotEmpty(created.ID)
 	assert.NoError(err)
 
-	_, err = createHost("10.0.0.1", db.HostRepository())
+	_, err = createHost("10.0.0.2", db.HostRepository())
 	assert.Error(err)
 }
 
@@ -78,9 +79,9 @@ func TestHostRetrieve(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
-	db.DB.DropTableIfExists(types.Host{})
+	db.DB.Exec("DROP TABLE if exists hosts cascade;")
 	db.Migrate()
-	created, err := createHost("10.0.0.1", db.HostRepository())
+	created, err := createHost("10.0.0.3", db.HostRepository())
 	assert.NotEmpty(created.ID)
 	assert.NoError(err)
 
@@ -94,13 +95,13 @@ func TestHostRetrieveAll(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
-	db.DB.DropTableIfExists(types.Host{})
+	db.DB.Exec("DROP TABLE if exists  hosts cascade;")
 	db.Migrate()
-	created, err := createHost("10.0.0.1", db.HostRepository())
+	created, err := createHost("10.0.0.4", db.HostRepository())
 	assert.NotEmpty(created.ID)
 	assert.NoError(err)
 
-	created2, err := createHost("10.0.0.2", db.HostRepository())
+	created2, err := createHost("10.0.0.5", db.HostRepository())
 	assert.NotEmpty(created2.ID)
 	assert.NoError(err)
 
@@ -111,7 +112,7 @@ func TestHostRetrieveAll(t *testing.T) {
 	assert.Len(all, 2)
 
 	filter := types.Host{}
-	filter.Hostname = "10.0.0.1"
+	filter.Hostname = "10.0.0.4"
 	all, err = db.HostRepository().RetrieveAll(filter)
 	assert.NoError(err)
 	assert.Len(all, 1)
@@ -121,7 +122,7 @@ func TestHostUpdate(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
-	db.DB.DropTableIfExists(types.Host{})
+	db.DB.Exec("DROP TABLE if exists  hosts cascade;")
 	db.Migrate()
 	host := types.Host{}
 	host.Hostname = "10.0.0.1"
@@ -142,7 +143,7 @@ func TestHostDelete(t *testing.T) {
 	db := dialDatabase(t)
 	assert := assert.New(t)
 	// If you somehow run this on production, god bless your poor soul
-	db.DB.DropTableIfExists(types.Host{})
+	db.DB.Exec("DROP TABLE if exists  hosts cascade;")
 	db.Migrate()
 	host := types.Host{}
 	host.Hostname = "10.0.0.1"
