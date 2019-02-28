@@ -6,18 +6,28 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
+type CVE struct {
+	ID          string `json:"id"`
+	Description string `json:"description"`
+}
+
 type Detection struct {
-	Description      string   `json:"detection"`
-	PID              int      `json:"pid"`
-	TID              int      `json:"tid"`
-	ProcessName      string   `json:"process_name"`
-	ProcessImagePath string   `json:"process_image_path"`
-	ProcessCmdLine   string   `json:"process_cmd_line"`
-	Timestamp        int64    `json:"timestamp"` // seconds since epoch
-	Severity         int      `json:"severity"`
-	ProfileName      string   `json:"profile_name"`
-	CVEIDs           []string `json:"cve_ids"`
-	ThreatClass      string   `json:"threat_class"`
+	Description     string  `json:"detection"`
+	PID             int     `json:"pid"`
+	TID             int     `json:"tid"`
+	ProcessName     string  `json:"process_name"`
+	ProcessPath     string  `json:"process_path"`
+	Message         string  `json:"message"`
+	Timestamp       int64   `json:"timestamp"` // seconds since epoch
+	Severity        float32 `json:"severity"`
+	ProfileName     string  `json:"profile_name"`
+	ProfileAuthor   string  `json:"profile_author"`
+	ProfileDate     string  `json:"profile_date"`
+	PluginOrigin    string  `json:"plugin_origin"`
+	LastNDetections int     `json:"last_n_detections"`
+	AverageSeverity float32 `json:"avg_severity_of_last_n_detections"`
+	CVEIDs          []CVE   `json:"cve_ids"`
+	ThreatClass     string  `json:"threat_class"`
 }
 
 type Report struct {
@@ -28,7 +38,4 @@ type Report struct {
 	Host          Host           `json:"-" gorm:"association_autoupdate:false;association_autocreate:false"`
 	Detection     Detection      `json:"detection"`
 	DetectionJSON postgres.Jsonb `json:"-"`
-	Error         struct {
-		Description string `json:"description"`
-	} `json:"error,omitempty"`
 }
