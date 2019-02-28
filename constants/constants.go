@@ -1,7 +1,7 @@
 package constants
 
 const ConfigDir = "/etc/tdservice/"
-const ExecutableDir = "/usr/local/bin/"
+const ExecutableDir = "/usr/bin/"
 const RunDir = "/var/run/tdservice/"
 const DataDir = "/var/lib/tdservice/"
 const LogDir = "/var/log/tdservice/"
