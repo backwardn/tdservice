@@ -18,7 +18,7 @@ func (pd *PostgresDatabase) Migrate() error {
 	pd.DB.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;`)
 	pd.DB.AutoMigrate(types.Host{}, types.Report{}, types.User{})
 	pd.DB.Table("reports").
-		AddForeignKey("host_id", "hosts(id)", "NO ACTION", "NO ACTION")
+		AddForeignKey("host_id", "hosts(id)", "SET NULL", "SET NULL")
 	return nil
 }
 
