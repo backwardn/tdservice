@@ -52,6 +52,7 @@ func (c *Configuration) Save() error {
 		if os.IsNotExist(err) {
 			// error is that the config doesnt yet exist, create it
 			file, err = os.Create(c.configFile)
+			os.Chmod(c.configFile, 0664)
 			if err != nil {
 				return err
 			}
@@ -70,8 +71,11 @@ func Load(path string) *Configuration {
 	if err == nil {
 		defer file.Close()
 		yaml.NewDecoder(file).Decode(&c)
+	} else {
+		// file doesnt exist, create a new blank one
+		c.LogLevel = log.ErrorLevel
 	}
-	// file doesnt exist, create a new blank one
+
 	c.configFile = path
 	return &c
 }

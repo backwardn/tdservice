@@ -16,6 +16,7 @@ test:
 
 installer: tdservice
 	mkdir -p out/installer
+	cp dist/linux/tdservice.service out/installer/tdservice.service
 	cp dist/linux/install.sh out/installer/install.sh && chmod +x out/installer/install.sh
 	cp out/tdservice out/installer/tdservice
 	makeself --notemp out/installer out/tdservice-$(VERSION).bin "Threat Detection Service $(VERSION)" ./install.sh

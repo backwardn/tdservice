@@ -72,7 +72,8 @@ func TestHostCreateDuplicate(t *testing.T) {
 	assert.NoError(err)
 
 	_, err = createHost("10.0.0.2", db.HostRepository())
-	assert.Error(err)
+	// we now support duplicates
+	assert.NoError(err)
 }
 
 func TestHostRetrieve(t *testing.T) {

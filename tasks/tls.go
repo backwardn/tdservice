@@ -106,19 +106,21 @@ func (ts TLS) Run(c setup.Context) error {
 			return fmt.Errorf("tls setup: %v", err)
 		}
 		// marshal private key to disk
-		keyOut, err := os.OpenFile(ts.TLSKeyFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600) // open file with restricted permissions
+		keyOut, err := os.OpenFile(ts.TLSKeyFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0) // open file with restricted permissions
 		if err != nil {
 			return fmt.Errorf("tls setup: %v", err)
 		}
+		os.Chmod(ts.TLSKeyFile, 0644)
 		defer keyOut.Close()
 		if err := pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: key}); err != nil {
 			return fmt.Errorf("tls setup: %v", err)
 		}
 		// marshal cert to disk
-		certOut, err := os.Create(ts.TLSCertFile)
+		certOut, err := os.OpenFile(ts.TLSCertFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0)
 		if err != nil {
 			return fmt.Errorf("tls setup: %v", err)
 		}
+		os.Chmod(ts.TLSCertFile, 0644)
 		defer certOut.Close()
 		if err := pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: cert}); err != nil {
 			return fmt.Errorf("tls setup: %v", err)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"intel/isecl/tdservice/types"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -81,7 +82,8 @@ func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
 		return nil, err
 	}
 	if rsp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("failed to create host: HTTP Code: %d", rsp.StatusCode)
+		msg, _ := ioutil.ReadAll(rsp.Body)
+		return nil, fmt.Errorf("failed to create host: %s: HTTP Code: %d", string(msg), rsp.StatusCode)
 	}
 	// parse it and return
 	var created types.Host

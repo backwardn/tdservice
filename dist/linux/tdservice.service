@@ -1,0 +1,17 @@
+[Unit]
+Description=Threat Detection Service
+
+[Service]
+Type=simple
+User=tds
+Group=tds
+ExecStart=/usr/bin/tdservice run
+ExecReload=/bin/kill -s HUP $MAINPID
+TimeoutStartSec=0
+Restart=on-failure
+PermissionsStartOnly=true
+RuntimeDirectory=tdservice
+RuntimeDirectoryMode=0775
+
+[Install]
+WantedBy=multi-user.target
