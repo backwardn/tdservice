@@ -37,14 +37,21 @@ id -u tds 2> /dev/null || useradd tds
 echo Installing Threat Detection Service...
 
 cp tdservice /usr/bin/tdservice
+chmod +x /usr/bin/tdservice 
 chmod 755 /usr/bin/tdservice
 
 # Create configuration directory in /etc
 mkdir -p /etc/tdservice && chown tds:tds /etc/tdservice
+chmod 775 /etc/tdservice
+chmod g+s /etc/tdservice
 # Create data dir in /var/lib
 mkdir -p /var/lib/tdservice && chown tds:tds /var/lib/tdservice
+chmod 775 /var/lib/tdservice
+chmod g+s /var/lib/tdservice
 # Create logging dir in /var/log
 mkdir -p /var/log/tdservice && chown tds:tds /var/log/tdservice
+chmod 775 /var/log/tdservice
+chmod g+s /var/log/tdservice
 
 # Install systemd script
 cp tdservice.service /etc/systemd/system/tdservice.service

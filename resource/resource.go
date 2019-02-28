@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"github.com/jinzhu/gorm"
+	log "github.com/sirupsen/logrus"
 )
 
 type errorHandlerFunc func(w http.ResponseWriter, r *http.Request) error
 
 func (ehf errorHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := ehf(w, r); err != nil {
+		log.WithError(err).Error("HTTP Error")
 		if gorm.IsRecordNotFoundError(err) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return

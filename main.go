@@ -8,9 +8,11 @@ import (
 
 func openLogFiles() (logFile *os.File, httpLogFile *os.File) {
 	logFilePath := path.Join(constants.LogDir, constants.LogFile)
-	logFile, _ = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	logFile, _ = os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	os.Chmod(logFilePath, 0664)
 	httpLogFilePath := path.Join(constants.LogDir, constants.HTTPLogFile)
-	httpLogFile, _ = os.OpenFile(httpLogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	httpLogFile, _ = os.OpenFile(httpLogFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	os.Chmod(httpLogFilePath, 0664)
 	return
 }
 

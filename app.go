@@ -80,7 +80,12 @@ func (a *App) executablePath() string {
 	if a.ExecutablePath != "" {
 		return a.ExecutablePath
 	} 
-	return path.Join(constants.ExecutableDir, "tdservice")
+	exec, err := os.Executable()
+	if err != nil {
+		// if we can't find self-executable path, we're probably in a state that is panic() worthy
+		panic(err)
+	}
+	return exec
 }
 
 func (a *App) configDir() string {
