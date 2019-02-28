@@ -27,7 +27,6 @@ type Detection struct {
 	LastNDetections int     `json:"last_n_detections"`
 	AverageSeverity float32 `json:"avg_severity_of_last_n_detections"`
 	CVEIDs          []CVE   `json:"cve_ids"`
-	ThreatClass     string  `json:"threat_class"`
 }
 
 type Report struct {
