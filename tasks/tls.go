@@ -86,11 +86,11 @@ func (ts TLS) Run(c setup.Context) error {
 	fmt.Fprintln(ts.ConsoleWriter, "Running tls setup...")
 	fs := flag.NewFlagSet("tls", flag.ContinueOnError)
 	force := fs.Bool("force", false, "force recreation, will overwrite any existing tls keys")
-	defaultHostname, err := c.GetenvString("TDS_TLS_HOSTS", "comma separated list of hostnames to add to TLS self signed cert")
+	defaultHostname, err := c.GetenvString("TDA_TLS_HOST_NAMES", "comma separated list of hostnames to add to TLS self signed cert")
 	if err != nil {
 		defaultHostname, _ = outboundHost()
 	}
-	host := fs.String("hosts", defaultHostname, "comma separated list of hostnames to add to TLS self signed cert")
+	host := fs.String("host_names", defaultHostname, "comma separated list of hostnames to add to TLS self signed cert")
 
 	err = fs.Parse(ts.Flags)
 	if err != nil {

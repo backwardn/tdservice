@@ -359,12 +359,12 @@ Environment variable `TDS_PORT` can be used instead of command line flags
 ### Setup - TLS
 
 ```bash
-> tdservice setup tls [--force] [--hosts=intel.com,10.1.168.2]
+> tdservice setup tls [--force] [--host_names=intel.com,10.1.168.2]
 ```
 
 Creates a Self Signed TLS Keypair in /etc/tdservice/ for quality of life. It is expected that consumers of this product will provide their own key and certificate in /etc/threat-detection before or after running setup, to make `TDA` use those instead. 
 
-Environment variable `TDS_TLS_HOSTS` can be used instead of command line flags
+Environment variable `TDS_TLS_HOST_NAMES` can be used instead of command line flags
 
 `--force` overwrites any existing files, and will always generate a self signed pair.
 

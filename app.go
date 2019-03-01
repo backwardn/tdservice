@@ -1,25 +1,25 @@
 package main
 
 import (
-	"intel/isecl/tdservice/version"
-	"intel/isecl/tdservice/middleware"
-	"strings"
-	"intel/isecl/tdservice/tasks"
-	"intel/isecl/lib/common/setup"
-	"flag"
-	"path"
 	"context"
+	"flag"
 	"fmt"
+	"intel/isecl/lib/common/setup"
 	"intel/isecl/tdservice/config"
 	"intel/isecl/tdservice/constants"
+	"intel/isecl/tdservice/middleware"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/repository/postgres"
 	"intel/isecl/tdservice/resource"
+	"intel/isecl/tdservice/tasks"
+	"intel/isecl/tdservice/version"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
+	"path"
+	"strings"
 	"syscall"
 	"time"
 
@@ -29,6 +29,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+
 	// Import driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -36,7 +37,7 @@ import (
 type App struct {
 	ConfigDir      string
 	RunDir         string
-	DataDir 		string
+	DataDir        string
 	ExecutablePath string
 	Config         *config.Configuration
 	ConsoleWriter  io.Writer
@@ -45,7 +46,40 @@ type App struct {
 }
 
 func (a *App) printUsage() {
-	fmt.Fprintln(a.consoleWriter(), "Help message here")
+	fmt.Fprintln(a.consoleWriter(), "Usage:")
+	fmt.Fprintln(a.consoleWriter(), "")
+	fmt.Fprintln(a.consoleWriter(), "    tdservice <command> [arguments]")
+	fmt.Fprintln(a.consoleWriter(), "")
+	fmt.Fprintln(a.consoleWriter(), "Avaliable Commands:")
+	fmt.Fprintln(a.consoleWriter(), "    help|-h|-help    Show this help message")
+	fmt.Fprintln(a.consoleWriter(), "    setup [task]     Run setup task")
+	fmt.Fprintln(a.consoleWriter(), "    start            Start tdservice")
+	fmt.Fprintln(a.consoleWriter(), "    status           Show the status of tdservice")
+	fmt.Fprintln(a.consoleWriter(), "    stop             Stop tdservice")
+	fmt.Fprintln(a.consoleWriter(), "    uninstall        Uninstall tdservice")
+	fmt.Fprintln(a.consoleWriter(), "    version          Show the version of tdservice")
+	fmt.Fprintln(a.consoleWriter(), "")
+	fmt.Fprintln(a.consoleWriter(), "Avaliable Tasks for setup:")
+	fmt.Fprintln(a.consoleWriter(), "    tdservice setup database [-force] [--arguments=<argument_value>]")
+	fmt.Fprintln(a.consoleWriter(), "        - Avaliable arguments are:")
+	fmt.Fprintln(a.consoleWriter(), "            - db-host        alternatively, set enviornment variable TDS_DB_HOSTNAME")
+	fmt.Fprintln(a.consoleWriter(), "            - db-port        alternatively, set enviornment variable TDS_DB_PORT")
+	fmt.Fprintln(a.consoleWriter(), "            - db-username    alternatively, set enviornment variable TDS_DB_USERNAME")
+	fmt.Fprintln(a.consoleWriter(), "            - db-password    alternatively, set enviornment variable TDS_DB_PASSWORD")
+	fmt.Fprintln(a.consoleWriter(), "            - db-name        alternatively, set enviornment variable TDS_DB_NAME")
+	fmt.Fprintln(a.consoleWriter(), "    tdservice setup server [--port=<port>]")
+	fmt.Fprintln(a.consoleWriter(), "        - Setup http server on <port>")
+	fmt.Fprintln(a.consoleWriter(), "        - Environment variable TDS_PORT=<port> can be set alternatively")
+	fmt.Fprintln(a.consoleWriter(), "    tdservice setup tls [--force] [--host_names=<host_names>]")
+	fmt.Fprintln(a.consoleWriter(), "        - Use the key and certificate provided in /etc/threat-detection if files exist")
+	fmt.Fprintln(a.consoleWriter(), "        - Otherwise create its own self-signed TLS keypair in /etc/tdservice for quality of life")
+	fmt.Fprintln(a.consoleWriter(), "        - Option [--force] overwrites any existing files, and always generate self-signed keypair")
+	fmt.Fprintln(a.consoleWriter(), "        - Argument <host_names> is a list of host names used by local machine, seperated by comma")
+	fmt.Fprintln(a.consoleWriter(), "        - Environment variable TDA_TLS_HOST_NAMES=<host_names> can be set alternatively")
+	fmt.Fprintln(a.consoleWriter(), "    tdservice setup admin [--admin-user=<username>] [--admin-pass=<password>]")
+	fmt.Fprintln(a.consoleWriter(), "        - Environment variable TDS_ADMIN_USERNAME=<username> can be set alternatively")
+	fmt.Fprintln(a.consoleWriter(), "        - Environment variable TDS_ADMIN_PASSWORD=<password> can be set alternatively")
+	fmt.Fprintln(a.consoleWriter(), "")
 }
 
 func (a *App) consoleWriter() io.Writer {
@@ -79,7 +113,7 @@ func (a *App) configuration() *config.Configuration {
 func (a *App) executablePath() string {
 	if a.ExecutablePath != "" {
 		return a.ExecutablePath
-	} 
+	}
 	exec, err := os.Executable()
 	if err != nil {
 		// if we can't find self-executable path, we're probably in a state that is panic() worthy
@@ -125,7 +159,7 @@ func (a *App) Run(args []string) error {
 		a.printUsage()
 		os.Exit(1)
 	}
-	
+
 	//bin := args[0]
 	cmd := args[1]
 	switch cmd {
@@ -155,18 +189,18 @@ func (a *App) Run(args []string) error {
 		os.Exit(0)
 	case "version":
 		fmt.Fprintf(a.consoleWriter(), "Threat Detection Service %s-%s\n", version.Version, version.GitHash)
-	case "setup": 
+	case "setup":
 		if len(args) <= 2 {
 			fmt.Fprintln(os.Stdout, "Available setup tasks:\n- database\n- admin\n- server\n- tls\n-----------------\n- [all]")
 			os.Exit(1)
 		}
 		task := strings.ToLower(args[2])
 		flags := args[3:]
-		setupRunner := &setup.Runner {
+		setupRunner := &setup.Runner{
 			Tasks: []setup.Task{
 				tasks.Database{
-					Flags: flags,
-					Config: a.configuration(),
+					Flags:         flags,
+					Config:        a.configuration(),
 					ConsoleWriter: os.Stdout,
 				},
 				tasks.Admin{
@@ -184,20 +218,20 @@ func (a *App) Run(args []string) error {
 					ConsoleWriter: os.Stdout,
 				},
 				tasks.Server{
-					Flags: flags,
-					Config: a.configuration(),
+					Flags:         flags,
+					Config:        a.configuration(),
 					ConsoleWriter: os.Stdout,
 				},
 				tasks.TLS{
-					Flags: flags,
-					TLSCertFile: path.Join(a.configDir(), constants.TLSCertFile),
-					TLSKeyFile: path.Join(a.configDir(), constants.TLSKeyFile), 
+					Flags:         flags,
+					TLSCertFile:   path.Join(a.configDir(), constants.TLSCertFile),
+					TLSKeyFile:    path.Join(a.configDir(), constants.TLSKeyFile),
 					ConsoleWriter: os.Stdout,
 				},
 			},
 			AskInput: false,
 		}
-		var err error 
+		var err error
 		if task == "all" {
 			err = setupRunner.RunTasks()
 		} else {
