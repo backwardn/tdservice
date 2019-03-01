@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"encoding/json"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 
@@ -14,10 +13,6 @@ type PostgresReportRepository struct {
 
 func (r *PostgresReportRepository) Create(report types.Report) (*types.Report, error) {
 	var err error
-	report.DetectionJSON.RawMessage, err = json.Marshal(&report.Detection)
-	if err != nil {
-		return nil, err
-	}
 	err = r.db.Create(&report).Error
 	return &report, err
 }

@@ -1,5 +1,3 @@
-// +build integration
-
 package postgres
 
 import (
@@ -22,6 +20,7 @@ func TestReportCreateRetrieve(t *testing.T) {
 	created, err := createHost("10.0.0.1", db.HostRepository())
 
 	report := types.Report{}
+	report.Detection.Description = "desc"
 	report.Detection.PID = 1
 	report.HostID = created.ID
 
@@ -34,6 +33,7 @@ func TestReportCreateRetrieve(t *testing.T) {
 	assert.Equal(createdReport.ID, retrieved.ID)
 	assert.NotEmpty(retrieved.Host.ID)
 	assert.Equal(created.ID, retrieved.Host.ID)
+	assert.Equal(createdReport.Detection, retrieved.Detection)
 
 	// create another report
 

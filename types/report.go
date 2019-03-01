@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/jinzhu/gorm/dialects/postgres"
@@ -12,7 +13,7 @@ type CVE struct {
 }
 
 type Detection struct {
-	Description     string  `json:"detection"`
+	Description     string  `json:"description"`
 	PID             int     `json:"pid"`
 	TID             int     `json:"tid"`
 	ProcessName     string  `json:"process_name"`
@@ -37,4 +38,14 @@ type Report struct {
 	Host          Host           `json:"-" gorm:"association_autoupdate:false;association_autocreate:false"`
 	Detection     Detection      `json:"detection"`
 	DetectionJSON postgres.Jsonb `json:"-"`
+}
+
+func (r *Report) BeforeSave() (err error) {
+	r.DetectionJSON.RawMessage, err = json.Marshal(&r.Detection)
+	return
+}
+
+func (r *Report) AfterFind() (err error) {
+	err = json.Unmarshal(r.DetectionJSON.RawMessage, &r.Detection)
+	return
 }
