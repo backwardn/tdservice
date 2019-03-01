@@ -20,7 +20,7 @@ func TestReportCreateRetrieve(t *testing.T) {
 	created, err := createHost("10.0.0.1", db.HostRepository())
 
 	report := types.Report{}
-	report.Detection.Description = "desc"
+	report.Detection.ProfileDescription = "desc"
 	report.Detection.PID = 1
 	report.HostID = created.ID
 

@@ -13,21 +13,21 @@ type CVE struct {
 }
 
 type Detection struct {
-	Description     string  `json:"description"`
-	PID             int     `json:"pid"`
-	TID             int     `json:"tid"`
-	ProcessName     string  `json:"process_name"`
-	ProcessPath     string  `json:"process_path"`
-	Message         string  `json:"message"`
-	Timestamp       int64   `json:"timestamp"` // seconds since epoch
-	Severity        float32 `json:"severity"`
-	ProfileName     string  `json:"profile_name"`
-	ProfileAuthor   string  `json:"profile_author"`
-	ProfileDate     string  `json:"profile_date"`
-	PluginOrigin    string  `json:"plugin_origin"`
-	LastNDetections int     `json:"last_n_detections"`
-	AverageSeverity float32 `json:"avg_severity_of_last_n_detections"`
-	CVEIDs          []CVE   `json:"cve_ids"`
+	PID                int     `json:"pid"`
+	TID                int     `json:"tid"`
+	ProcessName        string  `json:"process_name"`
+	ProcessPath        string  `json:"process_path"`
+	Message            string  `json:"message"`
+	Timestamp          int64   `json:"timestamp"` // seconds since epoch
+	Severity           float32 `json:"severity"`
+	ProfileDescription string  `json:"profile_description"`
+	ProfileName        string  `json:"profile_name"`
+	ProfileAuthor      string  `json:"profile_author"`
+	ProfileDate        string  `json:"profile_date"`
+	PluginOrigin       string  `json:"plugin_origin"`
+	LastNDetections    int     `json:"last_n_detections"`
+	AverageSeverity    float32 `json:"avg_severity_of_last_n_detections"`
+	CVEIDs             []CVE   `json:"cve_ids"`
 }
 
 type Report struct {

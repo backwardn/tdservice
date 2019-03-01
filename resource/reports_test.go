@@ -25,14 +25,14 @@ func TestCreateReport(t *testing.T) {
 	report := types.Report{
 		HostID: "2",
 		Detection: types.Detection{
-			Description: "description",
-			PID:         1,
-			TID:         2,
-			ProcessName: "process.name",
-			ProcessPath: "/usr/bin/process.name",
-			Timestamp:   1234,
-			Severity:    10,
-			CVEIDs:      []types.CVE{types.CVE{ID: "SPECTRE1", Description: "Desc"}},
+			ProfileDescription: "description",
+			PID:                1,
+			TID:                2,
+			ProcessName:        "process.name",
+			ProcessPath:        "/usr/bin/process.name",
+			Timestamp:          1234,
+			Severity:           10,
+			CVEIDs:             []types.CVE{types.CVE{ID: "SPECTRE1", Description: "Desc"}},
 		},
 	}
 	db.MockReportRepository.CreateFunc = func(r types.Report) (*types.Report, error) {
@@ -64,14 +64,14 @@ func TestRetrieveReport(t *testing.T) {
 		ID:     "1",
 		HostID: "2",
 		Detection: types.Detection{
-			Description: "description",
-			PID:         1,
-			TID:         2,
-			ProcessName: "process.name",
-			ProcessPath: "/usr/bin/process.name",
-			Timestamp:   1234,
-			Severity:    10,
-			CVEIDs:      []types.CVE{types.CVE{ID: "SPECTRE1", Description: "Desc"}},
+			ProfileDescription: "description",
+			PID:                1,
+			TID:                2,
+			ProcessName:        "process.name",
+			ProcessPath:        "/usr/bin/process.name",
+			Timestamp:          1234,
+			Severity:           10,
+			CVEIDs:             []types.CVE{types.CVE{ID: "SPECTRE1", Description: "Desc"}},
 		},
 	}
 	var reportRetrieved bool
@@ -96,7 +96,7 @@ func TestQueryReports(t *testing.T) {
 	report := types.Report{
 		HostID: "2",
 		Detection: types.Detection{
-			Description: "description",
+			ProfileDescription: "description",
 			PID:         1,
 			TID:         2,
 			ProcessName: "process.name",
