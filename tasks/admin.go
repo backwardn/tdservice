@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"intel/isecl/lib/common/setup"
+	"intel/isecl/lib/common/validation"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 	"io"
@@ -40,6 +41,10 @@ func (a Admin) Run(c setup.Context) error {
 	}
 	if *password == "" {
 		return errors.New("admin setup: Password cannot be empty")
+	}
+	valid_err := validation.ValidateAccount(*username, *password)
+	if valid_err != nil {
+		return valid_err
 	}
 	db, err := a.DatabaseFactory()
 	if err != nil {

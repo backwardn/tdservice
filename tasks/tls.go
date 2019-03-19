@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"intel/isecl/lib/common/setup"
+	"intel/isecl/lib/common/validation"
 	"io"
 	"math/big"
 	"net"
@@ -25,6 +26,7 @@ type TLS struct {
 	TLSKeyFile    string
 	TLSCertFile   string
 	ConsoleWriter io.Writer
+	// config  Config
 }
 
 func outboundHost() (string, error) {
@@ -101,6 +103,14 @@ func (ts TLS) Run(c setup.Context) error {
 			return errors.New("tls setup: no hostnames specified")
 		}
 		hosts := strings.Split(*host, ",")
+
+		// validate host names
+		for _, h := range hosts {
+			valid_err := validation.ValidateHostname(h)
+			if valid_err != nil {
+				return valid_err
+			}
+		}
 		key, cert, err := createSelfSignedCert(hosts)
 		if err != nil {
 			return fmt.Errorf("tls setup: %v", err)

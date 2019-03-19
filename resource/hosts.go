@@ -3,8 +3,11 @@ package resource
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"intel/isecl/lib/common/validation"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
+
 	"net/http"
 
 	"github.com/gorilla/handlers"
@@ -24,6 +27,7 @@ func SetHosts(r *mux.Router, db repository.TDSDatabase) {
 func createHost(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var h types.Host
+		var valid_err error
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields()
 		err := dec.Decode(&h.HostInfo)
@@ -32,14 +36,34 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		}
 		// validate host
 		if h.Hostname == "" {
-			return errors.New("hostname is empty")
+			return errors.New("hostname is invalid")
 		}
-		if h.OS == "" {
-			return errors.New("os is empty")
+		valid_err = validation.ValidateHostname(h.Hostname)
+		if valid_err != nil {
+			return fmt.Errorf("hostname validation fail: %s", valid_err.Error())
 		}
-		if h.Version == "" {
-			return errors.New("version is empty")
+		// validate os
+		if h.OS != "linux" && h.OS != "windows" {
+			return errors.New("os is invalid")
 		}
+		// validate version
+		if h.Version == "" || len(h.Version) > 32 {
+			return errors.New("version is invalid")
+		}
+
+		// valid_err = validation.ValidateRestrictedString(h.Version, "a-z\\-.0-9")
+		// if valid_err != nil {
+		// 	return fmt.Errorf("validation fail: %s", valid_err.Error())
+		// }
+		// validate build
+		if h.Build == "" || len(h.Build) > 32 {
+			return errors.New("build is invalid")
+		}
+		// valid_err = validation.ValidateRestrictedString(h.Build, "a-z0-9")
+		// if valid_err != nil {
+		// 	return fmt.Errorf("validation fail: %s", valid_err.Error())
+		// }
+
 		if err != nil {
 			return err
 		}

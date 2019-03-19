@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"intel/isecl/lib/common/setup"
+	"intel/isecl/lib/common/validation"
 	"intel/isecl/tdservice/config"
 	"intel/isecl/tdservice/constants"
 	"intel/isecl/tdservice/middleware"
@@ -62,11 +64,11 @@ func (a *App) printUsage() {
 	fmt.Fprintln(a.consoleWriter(), "Avaliable Tasks for setup:")
 	fmt.Fprintln(a.consoleWriter(), "    tdservice setup database [-force] [--arguments=<argument_value>]")
 	fmt.Fprintln(a.consoleWriter(), "        - Avaliable arguments are:")
-	fmt.Fprintln(a.consoleWriter(), "            - db-host        alternatively, set enviornment variable TDS_DB_HOSTNAME")
-	fmt.Fprintln(a.consoleWriter(), "            - db-port        alternatively, set enviornment variable TDS_DB_PORT")
-	fmt.Fprintln(a.consoleWriter(), "            - db-username    alternatively, set enviornment variable TDS_DB_USERNAME")
-	fmt.Fprintln(a.consoleWriter(), "            - db-password    alternatively, set enviornment variable TDS_DB_PASSWORD")
-	fmt.Fprintln(a.consoleWriter(), "            - db-name        alternatively, set enviornment variable TDS_DB_NAME")
+	fmt.Fprintln(a.consoleWriter(), "            - db-host        alternatively, set environment variable TDS_DB_HOSTNAME")
+	fmt.Fprintln(a.consoleWriter(), "            - db-port        alternatively, set environment variable TDS_DB_PORT")
+	fmt.Fprintln(a.consoleWriter(), "            - db-username    alternatively, set environment variable TDS_DB_USERNAME")
+	fmt.Fprintln(a.consoleWriter(), "            - db-password    alternatively, set environment variable TDS_DB_PASSWORD")
+	fmt.Fprintln(a.consoleWriter(), "            - db-name        alternatively, set environment variable TDS_DB_NAME")
 	fmt.Fprintln(a.consoleWriter(), "    tdservice setup server [--port=<port>]")
 	fmt.Fprintln(a.consoleWriter(), "        - Setup http server on <port>")
 	fmt.Fprintln(a.consoleWriter(), "        - Environment variable TDS_PORT=<port> can be set alternatively")
@@ -164,6 +166,7 @@ func (a *App) Run(args []string) error {
 	cmd := args[1]
 	switch cmd {
 	default:
+		fmt.Println("Error: Unrecognized command: ", args[1])
 		a.printUsage()
 	case "run":
 		return a.startServer()
@@ -190,10 +193,17 @@ func (a *App) Run(args []string) error {
 	case "version":
 		fmt.Fprintf(a.consoleWriter(), "Threat Detection Service %s-%s\n", version.Version, version.GitHash)
 	case "setup":
+
 		if len(args) <= 2 {
 			fmt.Fprintln(os.Stdout, "Available setup tasks:\n- database\n- admin\n- server\n- tls\n-----------------\n- [all]")
 			os.Exit(1)
 		}
+
+		valid_err := validateSetupArgs(args[2], args[3:])
+		if valid_err != nil {
+			return valid_err
+		}
+
 		task := strings.ToLower(args[2])
 		flags := args[3:]
 		setupRunner := &setup.Runner{
@@ -239,6 +249,7 @@ func (a *App) Run(args []string) error {
 		}
 		if err != nil {
 			log.WithError(err).Error("Error running setup")
+			fmt.Println("Error running setup: ", err)
 			return err
 		}
 	}
@@ -347,4 +358,98 @@ func (a *App) uninstall(keepConfig bool) {
 	}
 	fmt.Fprintln(a.consoleWriter(), "Threat Detection Service uninstalled")
 	a.stop()
+}
+
+func validateCmdAndEnv(env_names_cmd_opts map[string]string, flags *flag.FlagSet) error {
+
+	env_names := make([]string, 0)
+	for k, _ := range env_names_cmd_opts {
+		env_names = append(env_names, k)
+	}
+
+	missing, valid_err := validation.ValidateEnvList(env_names)
+	if valid_err != nil && missing != nil {
+		for _, m := range missing {
+			if cmd_f := flags.Lookup(env_names_cmd_opts[m]); cmd_f == nil {
+				return errors.New("Insufficient arguments")
+			}
+		}
+	}
+	return nil
+}
+
+func validateSetupArgs(cmd string, args []string) error {
+
+	var fs *flag.FlagSet
+
+	switch cmd {
+	default:
+		return errors.New("Unknown command")
+
+	case "database":
+
+		env_names_cmd_opts := map[string]string{
+			"TDS_DB_HOSTNAME": "db-host",
+			"TDS_DB_PORT":     "db-port",
+			"TDS_DB_USERNAME": "db-user",
+			"TDS_DB_PASSWORD": "db-pass",
+			"TDS_DB_NAME":     "db-name",
+		}
+
+		fs = flag.NewFlagSet("database", flag.ContinueOnError)
+		fs.String("db-host", "", "Database Hostname")
+		fs.Int("db-port", 0, "Database Port")
+		fs.String("db-user", "", "Database Username")
+		fs.String("db-pass", "", "Database Password")
+		fs.String("db-name", "", "Database Name")
+
+		err := fs.Parse(args)
+		if err != nil {
+			return fmt.Errorf("Fail to parse arguments: %s", err.Error())
+		}
+		return validateCmdAndEnv(env_names_cmd_opts, fs)
+
+	case "admin":
+
+		env_names_cmd_opts := map[string]string{
+			"TDS_ADMIN_USERNAME": "admin-user",
+			"TDS_ADMIN_PASSWORD": "admin-pass",
+		}
+
+		fs = flag.NewFlagSet("admin", flag.ContinueOnError)
+		fs.String("admin-user", "", "Username for admin authentication")
+		fs.String("admin-pass", "", "Password for admin authentication")
+
+		err := fs.Parse(args)
+		if err != nil {
+			return fmt.Errorf("Fail to parse arguments: %s", err.Error())
+		}
+		return validateCmdAndEnv(env_names_cmd_opts, fs)
+
+	case "server":
+		// this has a default port value on 8443
+		return nil
+
+	case "tls":
+
+		env_names_cmd_opts := map[string]string{
+			"TDA_TLS_HOST_NAMES": "host_names",
+		}
+
+		fs = flag.NewFlagSet("tls", flag.ContinueOnError)
+		fs.String("host_names", "", "comma separated list of hostnames to add to TLS self signed cert")
+
+		err := fs.Parse(args)
+		if err != nil {
+			return fmt.Errorf("Fail to parse arguments: %s", err.Error())
+		}
+		return validateCmdAndEnv(env_names_cmd_opts, fs)
+
+	case "all":
+		if len(args) != 0 {
+			return errors.New("Please setup the arguments with env")
+		}
+	}
+
+	return nil
 }

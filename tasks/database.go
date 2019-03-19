@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"intel/isecl/lib/common/setup"
+	"intel/isecl/lib/common/validation"
 	"intel/isecl/tdservice/config"
 	"io"
 )
@@ -33,6 +34,22 @@ func (db Database) Run(c setup.Context) error {
 	if err != nil {
 		return err
 	}
+
+	var valid_err error
+
+	valid_err = validation.ValidateHostname(db.Config.Postgres.Hostname)
+	if valid_err != nil {
+		return fmt.Errorf("Validation fail: %s", valid_err.Error())
+	}
+	valid_err = validation.ValidateAccount(db.Config.Postgres.Username, db.Config.Postgres.Password)
+	if valid_err != nil {
+		return fmt.Errorf("Validation fail: %s", valid_err.Error())
+	}
+	valid_err = validation.ValidateIdentifier(db.Config.Postgres.DBName)
+	if valid_err != nil {
+		return fmt.Errorf("Validation fail: %s", valid_err.Error())
+	}
+
 	return db.Config.Save()
 }
 

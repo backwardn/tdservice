@@ -34,7 +34,7 @@ func TestCreateAdmin(t *testing.T) {
 	var user *types.User
 	m.MockUserRepository.CreateFunc = func(u types.User) (*types.User, error) {
 		assert.Equal(t, "admin", u.Name)
-		assert.NoError(t, u.CheckPassword([]byte("foobar")))
+		assert.NoError(t, u.CheckPassword([]byte("foobarfoobar")))
 		u.ID = "123456"
 		user = &u
 		return user, nil
@@ -46,7 +46,7 @@ func TestCreateAdmin(t *testing.T) {
 		return user, nil
 	}
 	task := Admin{
-		Flags: []string{"-admin-user=admin", "-admin-pass=foobar"},
+		Flags: []string{"-admin-user=admin", "-admin-pass=foobarfoobar"},
 		DatabaseFactory: func() (repository.TDSDatabase, error) {
 			return m, nil
 		},

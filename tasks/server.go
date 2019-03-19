@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"intel/isecl/lib/common/setup"
@@ -25,6 +26,9 @@ func (s Server) Run(c setup.Context) error {
 	err = fs.Parse(s.Flags)
 	if err != nil {
 		return err
+	}
+	if s.Config.Port > 65535 || s.Config.Port <= 1024 {
+		return errors.New("Invalid or reserved port")
 	}
 	fmt.Fprintf(s.ConsoleWriter, "Using HTTPS port: %d\n", s.Config.Port)
 	return s.Config.Save()
