@@ -26,8 +26,16 @@ docker: installer
 	docker build -t isecl/tdservice:latest -f ./dist/docker/Dockerfile ./out
 	docker save isecl/tdservice:latest > ./out/docker-tdservice-$(VERSION)-$(GITCOMMIT).tar
 
-all: test docker
+docker-zip: installer
+	mkdir -p out/docker-tdservice
+	cp dist/docker/docker-compose.yml out/docker-tdservice/docker-compose
+	cp dist/docker/entrypoint.sh out/docker-tdservice/entrypoint.sh && chmod +x out/docker-tdservice/entrypoint.sh
+	cp dist/docker/README.md out/docker-tdservice/README.md
+	cp out/tdservice-$(VERSION).bin out/docker-tdservice/tdservice-$(VERSION).bin
+	cp dist/docker/Dockerfile out/docker-tdservice/Dockerfile
+	zip -r out/docker-tdservice.zip out/docker-tdservice	
 
+all: installer
 
 clean:
 	rm -f cover.*
