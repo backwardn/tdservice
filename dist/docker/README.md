@@ -69,9 +69,9 @@ Running the container
 
     | Type          | Name                               | Container Path                     |
     |:-------------:|:----------------------------------:|:----------------------------------:|
-    | Volume        | tdservice_tds-config-volum         | /etc/tdservice
+    | Volume        | tdservice_tds-config-volume        | /etc/tdservice
     | Volume        | tdservice_tds-log-volume           | /var/log/tdservice 
-	| Volume		| tdservice_tds-pgdata-volume        | 
+    | Volume        | tdservice_tds-pgdata-volume        | /var/lib/postgresql/data
 
     Volumes would be automatically created by docker-compose. 
 

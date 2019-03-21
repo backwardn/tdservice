@@ -35,7 +35,7 @@ docker-zip: installer
 	cp dist/docker/Dockerfile out/docker-tdservice/Dockerfile
 	zip -r out/docker-tdservice.zip out/docker-tdservice	
 
-all: installer
+all: test docker
 
 clean:
 	rm -f cover.*
