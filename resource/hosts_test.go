@@ -51,7 +51,7 @@ func TestRetrieveHost(t *testing.T) {
 				Build:   "1234",
 				OS:      "linux",
 			},
-			Status: "online",
+			Status: "Reserve for future implementation",
 		}, nil
 	}
 	r := setupRouter(db)
@@ -118,7 +118,7 @@ func TestQueryHosts(t *testing.T) {
 			Build:    "1234",
 			OS:       "linux",
 		},
-		Status: "online",
+		Status: "Reserve for future implementation",
 	}
 	db.MockHostRepository.RetrieveAllFunc = func(h types.Host) ([]types.Host, error) {
 		assert.Equal(filter, h)
@@ -127,7 +127,7 @@ func TestQueryHosts(t *testing.T) {
 	}
 	r := setupRouter(db)
 	recorder := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/tds/hosts?hostname=10.1.2.3&version=1.0&build=1234&os=linux&status=online", nil)
+	req := httptest.NewRequest("GET", "/tds/hosts?hostname=10.1.2.3&version=1.0&build=1234&os=linux", nil)
 	r.ServeHTTP(recorder, req)
 	assert.Equal(http.StatusOK, recorder.Code)
 	// setup expected
