@@ -35,3 +35,8 @@ func (r *PostgresUserRepository) Update(u types.User) error {
 func (r *PostgresUserRepository) Delete(u types.User) error {
 	return r.db.Delete(&u).Error
 }
+
+func (r *PostgresUserRepository) GetRoles(u types.User) (userRoles []types.Role, err error) {
+	err = r.db.Joins("INNER JOIN user_roles on user_roles.role_id = roles.id INNER JOIN users on user_roles.user_id = users.id").Where(&u).Find(&userRoles).Error
+	return userRoles, err
+}

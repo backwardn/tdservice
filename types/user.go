@@ -13,6 +13,7 @@ type User struct {
 	DeletedAt    *time.Time `json:"-"`
 	Name         string
 	PasswordHash []byte
+	Roles []Role `gorm:"many2many:user_roles"`
 }
 
 func (u *User) CheckPassword(password []byte) error {

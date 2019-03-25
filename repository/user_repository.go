@@ -7,4 +7,5 @@ type UserRepository interface {
 	Retrieve(types.User) (*types.User, error)
 	Update(types.User) error
 	Delete(types.User) error
+	GetRoles(types.User) ([]types.Role, error)
 }

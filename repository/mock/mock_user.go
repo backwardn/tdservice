@@ -38,3 +38,7 @@ func (m *MockUserRepository) Delete(user types.User) error {
 	}
 	return nil
 }
+
+func (m *MockUserRepository) GetRoles(user types.User) ([]types.Role, error) {
+	return nil, nil
+}
