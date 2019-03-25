@@ -1,8 +1,56 @@
 #!/bin/bash
 
+# READ .env file 
+echo PWD IS $(pwd)
+if [ -f ~/tdservice.env ]; then 
+    echo Reading Installation options from `realpath ~/tdservice.env`
+    source ~/tdservice.env
+elif [ -f ../tdservice.env ]; then
+    echo Reading Installation options from `realpath ../tdservice.env`
+    source ../tdservice.env
+else
+    echo No .env file found
+fi
+
+# Export all known variables
+export TDS_DB_HOSTNAME
+export TDS_DB_PORT
+export TDS_DB_USERNAME
+export TDS_DB_PASSWORD
+export TDS_DB_NAME
+
+# Check required variables
+if [ -z $TDS_DB_HOSTNAME ] ; then
+    echo "DB hostname not given"
+    exit 1
+fi
+if [ -z $TDS_DB_PORT ] ; then
+    echo "DB port not given"
+    exit 1
+fi
+if [ -z $TDS_DB_NAME ] ; then
+    echo "DB name not given"
+    exit 1
+fi
+if [ -z $TDS_DB_USERNAME ] ; then
+    echo "DB username not given"
+    exit 1
+fi
+if [ -z $TDS_DB_PASSWORD ] ; then
+    echo "DB password given"
+    exit 1
+fi
+
+echo "Installing postgres database on localhost..."
+
+export PGDATA=/usr/local/pgsql/data
+
 # download postgres repo
 yes | yum install https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-redhat11-11-2.noarch.rpm
 yes | yum install postgresql11 postgresql11-server postgresql11-contrib postgresql11-libs
+
+# create service file
+sed "s+Environment=PGDATA=/var/lib/pgsql/11/data/+Environment=PGDATA=$PGDATA+g" /usr/lib/systemd/system/postgresql-11.service > /etc/systemd/system/multi-user.target.wants/postgresql-11.service
 
 # setup postgres group
 groupadd pg_wheel && getent group pg_wheel

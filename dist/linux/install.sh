@@ -55,39 +55,11 @@ mkdir -p $LOG_PATH && chown tds:tds $LOG_PATH
 chmod 661 $LOG_PATH
 chmod g+s $LOG_PATH
 
-# Installation log file
-db_install_log=/var/log/tdservice/pgdb_install
-
 # Install systemd script
 cp tdservice.service $PRODUCT_HOME && chown tds:tds $PRODUCT_HOME/tdservice.service && chown tds:tds $PRODUCT_HOME
 
 # Enable systemd service
 systemctl enable $PRODUCT_HOME/tdservice.service
-
-# Install postgres if TDS_NOINSTALLDB is not set
-# We assume the user does not care us giving them a surprise in this case
-if [ -z $TDS_NOINSTALLDB ] ; then 
-    if [ -z $TDS_DB_HOSTNAME ] ; then
-        export TDS_DB_HOSTNAME=localhost
-    fi
-    if [ $TDS_DB_HOSTNAME -eq 'localhost' ] || [ $TDS_DB_HOSTNAME -eq '127.0.0.1' ] ; then 
-        if [ -z $TDS_DB_PORT ] ; then
-            export TDS_DB_PORT=5432
-        fi
-        if [ -z $TDS_DB_NAME ] ; then
-            export TDS_DB_NAME=tds_db
-        fi
-        if [ -z $TDS_DB_USERNAME ] ; then
-            export TDS_DB_USERNAME=tds_db_user
-        fi
-        if [ -z $TDS_DB_PASSWORD ] ; then
-            export TDS_DB_PASSWORD=tds_db_pass
-        fi
-        echo "TDS_NOINSTALLDB is not set, installing postgres database on localhost..."
-        echo "Check ${db_install_log} for more information"
-        ./install_pgdb.sh > $db_install_log
-    fi
-fi
 
 # check if TDS_NOSETUP is defined
 if [[ -z $TDS_NOSETUP ]]; then 
