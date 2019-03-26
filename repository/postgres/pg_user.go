@@ -1,7 +1,9 @@
 package postgres
 
 import (
+	"fmt"
 	"intel/isecl/tdservice/repository"
+
 	"intel/isecl/tdservice/types"
 
 	"github.com/jinzhu/gorm"
@@ -43,9 +45,6 @@ func (r *PostgresUserRepository) GetRoles(u types.User) (userRoles []types.Role,
 
 func (r *PostgresUserRepository) AddRoles(u types.User, roles []types.Role) error {
 
-	return nil
-	// TODO : comment above - implement below
-	//err = r.db.Joins("INNER JOIN user_roles on user_roles.role_id = roles.id INNER JOIN users on user_roles.user_id = users.id").Where(&u).Find(&userRoles).Error
-	//return userRoles, err
+	// To be implemented later. We do not need this now as we are adding roles when the user is created.
+	return fmt.Errorf("add roles function for user not implemented")
 }
-
