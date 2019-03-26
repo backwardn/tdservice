@@ -15,6 +15,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+
+ADMIN_ROLE="ADMINISTRATOR"
+
+)
 type Admin struct {
 	Flags           []string
 	DatabaseFactory func() (repository.TDSDatabase, error)
@@ -29,6 +34,7 @@ func (a Admin) Run(c setup.Context) error {
 	force := fs.Bool("force", false, "force creation")
 	username := fs.String("admin-user", envUser, "Username for admin authentication")
 	password := fs.String("admin-pass", envPass, "Password for admin authentication")
+         
 	err := fs.Parse(a.Flags)
 	if err != nil {
 		return err
@@ -57,7 +63,12 @@ func (a Admin) Run(c setup.Context) error {
 		// if force, delete any users with the name
 		db.UserRepository().Delete(types.User{Name: *username})
 	}
-	db.UserRepository().Create(types.User{Name: *username, PasswordHash: hash})
+        admin_role := types.Role{Name: ADMIN_ROLE}
+	db.UserRepository().Create(types.User{Name:  *username, 
+                                              PasswordHash: hash,
+                                              Roles: []types.Role{admin_role},
+                                             })
+
 	return nil
 }
 
