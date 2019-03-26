@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"intel/isecl/lib/common/setup"
 	"intel/isecl/lib/common/validation"
+        consts "intel/isecl/tdservice/constants"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 	"io"
@@ -15,11 +16,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-
-ADMIN_ROLE="ADMINISTRATOR"
-
-)
 type Admin struct {
 	Flags           []string
 	DatabaseFactory func() (repository.TDSDatabase, error)
@@ -63,7 +59,7 @@ func (a Admin) Run(c setup.Context) error {
 		// if force, delete any users with the name
 		db.UserRepository().Delete(types.User{Name: *username})
 	}
-        admin_role := types.Role{Name: ADMIN_ROLE}
+        admin_role := types.Role{Name: consts.AdminGroup}
 	db.UserRepository().Create(types.User{Name:  *username, 
                                               PasswordHash: hash,
                                               Roles: []types.Role{admin_role},

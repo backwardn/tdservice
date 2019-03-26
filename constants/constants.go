@@ -18,6 +18,11 @@ const (
 	HashingAlgorithm = crypto.SHA384
 )
 
+const (
+	AdminGroup = "ADMINISTRATORS"
+	TDAgentGroup = "TD_AGENTS"
+)
+
 // State represents whether or not a daemon is running or not
 type State bool
 
