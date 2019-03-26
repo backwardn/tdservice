@@ -33,6 +33,10 @@ func (pd *PostgresDatabase) UserRepository() repository.UserRepository {
 	return &PostgresUserRepository{db: pd.DB}
 }
 
+func (pd *PostgresDatabase) RoleRepository() repository.RoleRepository {
+	return &PostgresRoleRepository{db: pd.DB}
+}
+
 func (pd *PostgresDatabase) Close() {
 	if pd.DB != nil {
 		pd.DB.Close()

@@ -5,5 +5,6 @@ type TDSDatabase interface {
 	HostRepository() HostRepository
 	ReportRepository() ReportRepository
 	UserRepository() UserRepository
+	RoleRepository() RoleRepository
 	Close()
 }

@@ -8,4 +8,5 @@ type UserRepository interface {
 	Update(types.User) error
 	Delete(types.User) error
 	GetRoles(types.User) ([]types.Role, error)
+	AddRoles(types.User, []types.Role) error
 }

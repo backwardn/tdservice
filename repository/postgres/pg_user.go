@@ -40,3 +40,12 @@ func (r *PostgresUserRepository) GetRoles(u types.User) (userRoles []types.Role,
 	err = r.db.Joins("INNER JOIN user_roles on user_roles.role_id = roles.id INNER JOIN users on user_roles.user_id = users.id").Where(&u).Find(&userRoles).Error
 	return userRoles, err
 }
+
+func (r *PostgresUserRepository) AddRoles(u types.User, roles []types.Role) error {
+
+	return nil
+	// TODO : comment above - implement below
+	//err = r.db.Joins("INNER JOIN user_roles on user_roles.role_id = roles.id INNER JOIN users on user_roles.user_id = users.id").Where(&u).Find(&userRoles).Error
+	//return userRoles, err
+}
+
