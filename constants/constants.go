@@ -1,5 +1,7 @@
 package constants
 
+import "crypto"
+
 const (
 	HomeDir          = "/opt/tdservice/"
 	ConfigDir        = "/etc/tdservice/"
@@ -13,6 +15,7 @@ const (
 	TLSKeyFile       = "key.pem"
 	PIDFile          = "tdservice.pid"
 	ServiceRemoveCmd = "systemctl disable tdservice"
+	HashingAlgorithm = crypto.SHA384
 )
 
 // State represents whether or not a daemon is running or not
