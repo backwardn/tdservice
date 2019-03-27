@@ -19,6 +19,8 @@ export TDS_DB_USERNAME
 export TDS_DB_PASSWORD
 export TDS_DB_NAME
 
+export TDS_PORT
+
 export TDS_ADMIN_USERNAME
 export TDS_ADMIN_PASSWORD
 
