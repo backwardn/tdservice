@@ -37,9 +37,10 @@ import (
 )
 
 type App struct {
+	HomeDir      string
 	ConfigDir      string
 	RunDir         string
-	DataDir        string
+	LogDir         string
 	ExecutablePath string
 	Config         *config.Configuration
 	ConsoleWriter  io.Writer
@@ -124,6 +125,13 @@ func (a *App) executablePath() string {
 	return exec
 }
 
+func (a *App) homeDir() string {
+	if a.HomeDir != "" {
+		return a.HomeDir
+	}
+	return constants.HomeDir
+}
+
 func (a *App) configDir() string {
 	if a.ConfigDir != "" {
 		return a.ConfigDir
@@ -131,11 +139,11 @@ func (a *App) configDir() string {
 	return constants.ConfigDir
 }
 
-func (a *App) dataDir() string {
-	if a.DataDir != "" {
-		return a.DataDir
+func (a *App) logDir() string {
+	if a.LogDir != "" {
+		return a.ConfigDir
 	}
-	return constants.DataDir
+	return constants.LogDir
 }
 
 func (a *App) runDir() string {
@@ -348,13 +356,17 @@ func (a *App) uninstall(keepConfig bool) {
 			log.WithError(err).Error("error removing config dir")
 		}
 	}
+	err = os.RemoveAll(a.logDir())
+	if err != nil {
+		log.WithError(err).Error("error removing log dir")
+	}
 	err = os.RemoveAll(a.runDir())
 	if err != nil {
 		log.WithError(err).Error("error removing config dir")
 	}
-	err = os.RemoveAll(a.dataDir())
+	err = os.RemoveAll(a.homeDir())
 	if err != nil {
-		log.WithError(err).Error("error removing data dir")
+		log.WithError(err).Error("error removing home dir")
 	}
 	fmt.Fprintln(a.consoleWriter(), "Threat Detection Service uninstalled")
 	a.stop()
