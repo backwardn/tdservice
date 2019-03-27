@@ -5,14 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"intel/isecl/lib/common/validation"
+	"intel/isecl/lib/common/crypt"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
+	consts "intel/isecl/tdservice/constants"
 
 	"net/http"
 
 	"github.com/gorilla/handlers"
 	log "github.com/sirupsen/logrus"
-
+	
+	"golang.org/x/crypto/bcrypt"
 	"github.com/gorilla/mux"
 )
 
@@ -74,9 +77,29 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		if err != nil {
 			return err
 		}
+		// create the user and roles that represents the new domain. API endpoints that are restricted to updates only from the newly created 
+		// hosts shall be protected with the role. 
+		rand, err := crypt.GetRandomBytes(consts.PasswordRandomLength)
+		if err != nil {
+			return err
+		}
+		hash, err := bcrypt.GenerateFromPassword(rand, bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		host_user_role := types.Role{Name: consts.HostSelfUpdateGroupName,
+									 Domain: created.ID}
+		host_user := types.User{PasswordHash: hash,
+								Roles : []types.Role{host_user_role}}
+
+		user, err := db.UserRepository().Create(host_user)
+		resp  := types.HostCreateResponse{}
+		resp.HostInfo = created.HostInfo
+		resp.User = user.ID
+		resp.Token = rand
 		w.WriteHeader(http.StatusCreated) // HTTP 201
 		w.Header().Set("Content-Type", "application/json")
-		err = json.NewEncoder(w).Encode(&created)
+		err = json.NewEncoder(w).Encode(&resp)
 		if err != nil {
 			return err
 		}

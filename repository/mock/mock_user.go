@@ -46,3 +46,4 @@ func (m *MockUserRepository) GetRoles(user types.User) ([]types.Role, error) {
 func (m *MockUserRepository) AddRoles(u types.User, roles []types.Role) error {
 	return nil
 }
+
