@@ -31,7 +31,7 @@ type Detection struct {
 }
 
 type Report struct {
-	ID            string         `json:"id" gorm:"primary_key;type:uuid;default:uuid_generate_v4()"`
+	ID            string         `json:"id" gorm:"primary_key;type:uuid"`
 	CreatedAt     time.Time      `json:"-"`
 	DeletedAt     *time.Time     `json:"-"`
 	HostID        string         `json:"host_id" gorm:"type:uuid;"`

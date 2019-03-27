@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 
 	"github.com/jinzhu/gorm"
@@ -11,7 +12,14 @@ type PostgresUserRepository struct {
 }
 
 func (r *PostgresUserRepository) Create(u types.User) (*types.User, error) {
-	err := r.db.Create(&u).Error
+
+	uuid, err := repository.UUID()
+	if err == nil {
+		u.ID = uuid
+	} else {
+		return &u, err
+	}
+	err = r.db.Create(&u).Error
 	return &u, err
 }
 

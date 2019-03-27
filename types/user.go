@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID           string     `gorm:"primary_key;type:uuid;default:uuid_generate_v4()"`
+	ID           string     `gorm:"primary_key;type:uuid"`
 	CreatedAt    time.Time  `json:"-"`
 	UpdatedAt    time.Time  `json:"-"`
 	DeletedAt    *time.Time `json:"-"`
