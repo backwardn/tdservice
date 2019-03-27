@@ -93,6 +93,10 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 								Roles : []types.Role{host_user_role}}
 
 		user, err := db.UserRepository().Create(host_user)
+		//_, err = db.UserRepository().Create(host_user)
+		if err != nil {
+			return err
+		}
 		resp  := types.HostCreateResponse{}
 		resp.HostInfo = created.HostInfo
 		resp.User = user.ID

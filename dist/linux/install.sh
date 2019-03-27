@@ -22,6 +22,9 @@ export TDS_DB_NAME
 export TDS_ADMIN_USERNAME
 export TDS_ADMIN_PASSWORD
 
+export TDS_REG_HOST_USERNAME
+export TDS_REG_HOST_PASSWORD
+
 export TDS_TLS_HOSTS
 
 if [[ $EUID -ne 0 ]]; then 
