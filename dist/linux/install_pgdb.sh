@@ -3,10 +3,10 @@
 # READ .env file 
 echo PWD IS $(pwd)
 if [ -f ~/tdservice.env ]; then 
-    echo Reading Installation options from `realpath ~/tdservice.env`
+    echo Reading installation options from `realpath ~/tdservice.env`
     source ~/tdservice.env
 elif [ -f ../tdservice.env ]; then
-    echo Reading Installation options from `realpath ../tdservice.env`
+    echo Reading installation options from `realpath ../tdservice.env`
     source ../tdservice.env
 else
     echo No .env file found
@@ -21,81 +21,111 @@ export TDS_DB_NAME
 
 # Check required variables
 if [ -z $TDS_DB_HOSTNAME ] ; then
-    echo "DB hostname not given"
+    echo "DB hostname is not given"
     exit 1
 fi
 if [ -z $TDS_DB_PORT ] ; then
-    echo "DB port not given"
+    echo "DB port is not given"
     exit 1
 fi
 if [ -z $TDS_DB_NAME ] ; then
-    echo "DB name not given"
+    echo "DB name is not given"
     exit 1
 fi
 if [ -z $TDS_DB_USERNAME ] ; then
-    echo "DB username not given"
+    echo "DB username is not given"
     exit 1
 fi
 if [ -z $TDS_DB_PASSWORD ] ; then
-    echo "DB password given"
+    echo "DB password is not given"
     exit 1
 fi
 
-echo "Installing postgres database on localhost..."
+echo "Installing postgres database version 11 and its rpm repo for RHEL 7 x86_64 ..."
 
-export PGDATA=/usr/local/pgsql/data
+cd /tmp
+log_file=/dev/null
+if [ -z $SAVE_DB_INSTALL_LOG ] ; then
+	log_file=~/db_install_log
+fi
 
 # download postgres repo
-yes | yum install https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-redhat11-11-2.noarch.rpm
-yes | yum install postgresql11 postgresql11-server postgresql11-contrib postgresql11-libs
+yum install https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-redhat11-11-2.noarch.rpm -y &>> $log_file
+yum install postgresql11 postgresql11-server postgresql11-contrib postgresql11-libs -y &>> $log_file
 
-# create service file
-sed "s+Environment=PGDATA=/var/lib/pgsql/11/data/+Environment=PGDATA=$PGDATA+g" /usr/lib/systemd/system/postgresql-11.service > /etc/systemd/system/multi-user.target.wants/postgresql-11.service
+if [ $? -ne 0 ] ; then
+	echo "yum installation fail"
+	exit 1
+fi
 
-# setup postgres group
-groupadd pg_wheel && getent group pg_wheel
-gpasswd -a postgres pg_wheel
+echo "Initializing postgres database ..."
 
-# cleanup and create folders for db
-rm -Rf /usr/local/pgsql
-mkdir /usr/local/pgsql
-mkdir /usr/local/pgsql/data
-chown -R postgres:pg_wheel /usr/local/pgsql
+# required env variables
+export PGDATA=/usr/local/pgsql/data
+export PGHOST=$TDS_DB_HOSTNAME
+export PGPORT=$TDS_DB_PORT
 
-# generate setup script
-db_setup_sh=/var/tmp/setup_db.sh
-rm -f $db_setup_sh
-echo "echo \"umask 077\" >> ~/.bash_rc" >> $db_setup_sh
-echo "source ~/.bash_rc" >> $db_setup_sh
-echo "cd /usr/local/pgsql" >> $db_setup_sh
-echo "export PGHOST=${TDS_DB_HOSTNAME}" >> $db_setup_sh
-echo "export PGPORT=${TDS_DB_PORT}" >> $db_setup_sh
-echo "export PGDATA=/usr/local/pgsql/data" >> $db_setup_sh
-echo "/usr/pgsql-11/bin/pg_ctl -D /usr/local/pgsql/data initdb" >> $db_setup_sh
-echo "/usr/pgsql-11/bin/pg_ctl -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start" >> $db_setup_sh
+# if there is no preset database folder, set it up
+if [ ! -f $PGDATA/pg_hba.conf ] ; then
+	# cleanup and create folders for db
+	rm -Rf /usr/local/pgsql
+	mkdir -p /usr/local/pgsql/data
+	chown -R postgres:postgres /usr/local/pgsql
 
-echo "echo \"local all postgres peer\" >> /usr/local/pgsql/data/pg_hba.conf" >> $db_setup_sh
-echo "echo \"local all all peer\" >> /usr/local/pgsql/data/pg_hba.conf" >> $db_setup_sh
-echo "echo \"listen_addresses = '*'\" >> /usr/local/pgsql/data/pg_hba.conf" >> $db_setup_sh
-echo "echo \"host all postgres 127.0.0.1/32 md5\" >> /usr/local/pgsql/data/pg_hba.conf" >> $db_setup_sh
+	sudo -u postgres /usr/pgsql-11/bin/pg_ctl initdb -D $PGDATA &>> $log_file
+	
+	mv $PGDATA/pg_hba.conf $PGDATA/pg_hba-template.conf
+	echo "local all postgres peer" >> $PGDATA/pg_hba.conf
+	echo "local all all md5" >> $PGDATA/pg_hba.conf
+	echo "host all all 127.0.0.1/32 md5" >> $PGDATA/pg_hba.conf
+fi
 
-echo "psql -c \"alter system set log_connections = 'on';\"" >> $db_setup_sh
-echo "psql -c \"alter system set log_disconnections = 'on';\"" >> $db_setup_sh
-echo "psql -c \"select pg_reload_conf();\"" >> $db_setup_sh
-echo "psql -c \"CREATE EXTENSION \\\"uuid-ossp\\\";\"" >> $db_setup_sh
+echo "Setting up systemctl for postgres database ..."
 
-echo "psql -c \"CREATE USER ${TDS_DB_USERNAME} WITH SUPERUSER PASSWORD '${TDS_DB_PASSWORD}';\"" >> $db_setup_sh
-echo "psql -c \"CREATE DATABASE ${TDS_DB_NAME}\"" >> $db_setup_sh
+# setup systemd startup for postgresql
+pg_systemd=/usr/lib/systemd/system/postgresql-11.service
+rm -rf $pg_systemd
+echo "[Unit]" >> $pg_systemd
+echo "Description=PostgreSQL database server" >> $pg_systemd
+echo "Documentation=https://www.postgresql.org/docs/11/static/" >> $pg_systemd
+echo "After=network.target" >> $pg_systemd
+echo "After=syslog.target" >> $pg_systemd
+echo "" >> $pg_systemd
+echo "[Service]" >> $pg_systemd
+echo "Type=forking" >> $pg_systemd
+echo "User=postgres" >> $pg_systemd
+echo "Group=postgres" >> $pg_systemd
+echo "Environment=PGDATA=${PGDATA}" >> $pg_systemd
+echo "OOMScoreAdjust=-1000" >> $pg_systemd
+echo "Environment=PG_OOM_ADJUST_FILE=/proc/self/oom_score_adj" >> $pg_systemd
+echo "Environment=PG_OOM_ADJUST_VALUE=0" >> $pg_systemd
+echo "ExecStart=/usr/pgsql-11/bin/pg_ctl start -D ${PGDATA} -l ${PGDATA}/pg_log" >> $pg_systemd
+echo "ExecStop=/usr/pgsql-11/bin/pg_ctl stop -D ${PGDATA}" >> $pg_systemd
+echo "ExecReload=/usr/pgsql-11/bin/pg_ctl reload -D ${PGDATA}" >> $pg_systemd
+echo "" >> $pg_systemd
+echo "TimeoutSec=300" >> $pg_systemd
+echo "" >> $pg_systemd
+echo "[Install]" >> $pg_systemd
+echo "WantedBy=multi-user.target" >> $pg_systemd
+echo "" >> $pg_systemd
 
-echo "psql -c \"GRANT ALL PRIVILEGES ON DATABASE ${TDS_DB_NAME} TO ${TDS_DB_USERNAME};\"" >> $db_setup_sh
-echo "psql -c \"ALTER ROLE ${TDS_DB_USERNAME} NOCREATEROLE;\"" >> $db_setup_sh
-echo "psql -c \"ALTER ROLE ${TDS_DB_USERNAME} NOCREATEDB;\"" >> $db_setup_sh
-echo "psql -c \"ALTER ROLE ${TDS_DB_USERNAME} NOREPLICATION;\"" >> $db_setup_sh
-echo "psql -c \"ALTER ROLE ${TDS_DB_USERNAME} NOBYPASSRLS;\"" >> $db_setup_sh
-echo "psql -c \"ALTER ROLE ${TDS_DB_USERNAME} NOINHERIT;\"" >> $db_setup_sh
+systemctl daemon-reload &>> $log_file
+systemctl enable postgresql-11.service &>> $log_file
 
-# run setup script as postgres user and cleanup
-chown -R postgres:pg_wheel $db_setup_sh
-chmod +x $db_setup_sh
-su postgres -c "source $db_setup_sh"
-rm -f $db_setup_sh
+echo "Setting up postgres database ..."
+
+# start the database service
+service postgresql-11 start &>> $log_file
+
+sudo -u postgres psql postgres -c "alter system set log_connections = 'on';" &>> $log_file
+sudo -u postgres psql postgres -c "alter system set log_disconnections = 'on';" &>> $log_file
+sudo -u postgres psql postgres -c "CREATE EXTENSION \"uuid-ossp\";" &>> $log_file
+sudo -u postgres psql postgres -c "CREATE USER ${TDS_DB_USERNAME} WITH PASSWORD '${TDS_DB_PASSWORD}';" &>> $log_file
+sudo -u postgres psql postgres -c "CREATE DATABASE ${TDS_DB_NAME}" &>> $log_file
+sudo -u postgres psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE ${TDS_DB_NAME} TO ${TDS_DB_USERNAME};" &>> $log_file
+sudo -u postgres psql postgres -c "ALTER ROLE ${TDS_DB_USERNAME} NOSUPERUSER;" &>> $log_file
+sudo -u postgres psql postgres -c "ALTER ROLE ${TDS_DB_USERNAME} NOCREATEROLE;" &>> $log_file
+sudo -u postgres psql postgres -c "ALTER ROLE ${TDS_DB_USERNAME} NOCREATEDB;" &>> $log_file
+sudo -u postgres psql postgres -c "ALTER ROLE ${TDS_DB_USERNAME} NOREPLICATION;" &>> $log_file
+sudo -u postgres psql postgres -c "ALTER ROLE ${TDS_DB_USERNAME} NOBYPASSRLS;" &>> $log_file
+sudo -u postgres psql postgres -c "ALTER ROLE ${TDS_DB_USERNAME} NOINHERIT;" &>> $log_file
