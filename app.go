@@ -36,6 +36,8 @@ import (
 
 	// Import driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+
+	"intel/isecl/tdservice/types"
 )
 
 type App struct {
@@ -178,6 +180,9 @@ func (a *App) Run(args []string) error {
 	default:
 		fmt.Println("Error: Unrecognized command: ", args[1])
 		a.printUsage()
+	//TODO : Remove added for debug - used to debug db queries
+	case "testdb":
+		a.TestNewDBFunctions()
 	case "run":
 		return a.startServer()
 	case "-help":
@@ -480,4 +485,33 @@ func validateSetupArgs(cmd string, args []string) error {
 	}
 
 	return nil
+}
+
+//TODO : Debug code to be removed. Added for testing database query functions
+func (a *App) TestNewDBFunctions() error {
+	fmt.Println("Test New DB functions")
+	db, err := a.DatabaseFactory()
+	if err != nil {
+		log.WithError(err).Error("failed to open database")
+		return err
+	}
+	users, err := db.UserRepository().GetRoles(types.User{Name: "admin"})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Printf("User: %v", users)
+
+	defer db.Close()
+	return nil
+}
+
+func (a *App) DatabaseFactory() (repository.TDSDatabase, error) {
+	pg := &a.configuration().Postgres
+	p, err := postgres.Open(pg.Hostname, pg.Port, pg.DBName, pg.Username, pg.Password, pg.SSLMode)
+	if err != nil {
+		fmt.Println("failed to open postgres connection for setup task")
+		return nil, err
+	}
+	return p, nil
 }

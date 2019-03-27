@@ -19,8 +19,8 @@ const (
 )
 
 const (
-	AdminGroup = "ADMINISTRATORS"
-	TDAgentGroup = "TD_AGENTS"
+	AdminGroupName        = "Administrators"
+	RegisterHostGroupName = "RegisterHosts"
 )
 
 // State represents whether or not a daemon is running or not

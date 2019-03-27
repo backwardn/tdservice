@@ -59,12 +59,18 @@ func (a Admin) Run(c setup.Context) error {
 		// if force, delete any users with the name
 		db.UserRepository().Delete(types.User{Name: *username})
 	}
-        admin_role := types.Role{Name: consts.AdminGroup}
+        admin_role := types.Role{Name: consts.AdminGroupName}
 	db.UserRepository().Create(types.User{Name:  *username, 
                                               PasswordHash: hash,
                                               Roles: []types.Role{admin_role},
-                                             })
-
+											 })
+	//hack to install the second user and role
+	register_host_role := types.Role{Name: consts.RegisterHostGroupName}
+	hash, _ = bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+	db.UserRepository().Create(types.User{Name:  "reghost",
+												PasswordHash: hash,
+												Roles: []types.Role{register_host_role},
+	   										 })
 	return nil
 }
 
