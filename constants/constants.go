@@ -1,19 +1,18 @@
 package constants
 
-const ConfigDir = "/etc/tdservice/"
-const ExecutableDir = "/usr/bin/"
-const RunDir = "/var/run/tdservice/"
-const DataDir = "/var/lib/tdservice/"
-const LogDir = "/var/log/tdservice/"
-
-const LogFile = "tdservice.log"
-const HTTPLogFile = "http.log"
-const ConfigFile = "config.yml"
-
-const TLSCertFile = "cert.pem"
-const TLSKeyFile = "key.pem"
-
-const PIDFile = "tdservice.pid"
+const (
+	HomeDir       = "/opt/tdservice/"
+	ConfigDir     = "/etc/tdservice/"
+	ExecutableDir = "/opt/tdservice/bin/"
+	LogDir        = "/var/log/tdservice/"
+	RunDir        = "/var/run/tdservice/"
+	LogFile       = "tdservice.log"
+	HTTPLogFile   = "http.log"
+	ConfigFile    = "config.yml"
+	TLSCertFile   = "cert.pem"
+	TLSKeyFile    = "key.pem"
+	PIDFile       = "tdservice.pid"
+)
 
 // State represents whether or not a daemon is running or not
 type State bool

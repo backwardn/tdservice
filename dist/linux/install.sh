@@ -36,28 +36,32 @@ id -u tds 2> /dev/null || useradd tds
 
 echo Installing Threat Detection Service...
 
-cp tdservice /usr/bin/tdservice
-chmod +x /usr/bin/tdservice 
-chmod 755 /usr/bin/tdservice
+COMPONENT_NAME=tdservice
+PRODUCT_HOME=/opt/$COMPONENT_NAME
+BIN_PATH=$PRODUCT_HOME/bin
+LOG_PATH=/var/log/$COMPONENT_NAME/
+CONFIG_PATH=/etc/$COMPONENT_NAME/
+
+mkdir -p $BIN_PATH && chown tds:tds $BIN_PATH/
+cp $COMPONENT_NAME $BIN_PATH/
+chmod 750 $BIN_PATH/*
+ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 # Create configuration directory in /etc
-mkdir -p /etc/tdservice && chown tds:tds /etc/tdservice
-chmod 775 /etc/tdservice
-chmod g+s /etc/tdservice
-# Create data dir in /var/lib
-mkdir -p /var/lib/tdservice && chown tds:tds /var/lib/tdservice
-chmod 775 /var/lib/tdservice
-chmod g+s /var/lib/tdservice
+mkdir -p $CONFIG_PATH && chown tds:tds $CONFIG_PATH
+chmod 700 $CONFIG_PATH
+chmod g+s $CONFIG_PATH
+
 # Create logging dir in /var/log
-mkdir -p /var/log/tdservice && chown tds:tds /var/log/tdservice
-chmod 775 /var/log/tdservice
-chmod g+s /var/log/tdservice
+mkdir -p $LOG_PATH && chown tds:tds $LOG_PATH
+chmod 661 $LOG_PATH
+chmod g+s $LOG_PATH
 
 # Install systemd script
-cp tdservice.service /etc/systemd/system/tdservice.service
+cp tdservice.service $PRODUCT_HOME && chown tds:tds $PRODUCT_HOME/tdservice.service
 
 # Enable systemd service
-systemctl enable tdservice
+systemctl enable $PRODUCT_HOME/tdservice.service
 
 # check if TDS_NOSETUP is defined
 if [[ -z $TDS_NOSETUP ]]; then 
