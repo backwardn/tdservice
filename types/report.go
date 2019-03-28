@@ -32,8 +32,8 @@ type Detection struct {
 
 type Report struct {
 	ID            string         `json:"id" gorm:"primary_key;type:uuid"`
-	CreatedAt     time.Time      `sql:"type:timestamp"`
-	DeletedAt     time.Time      `sql:"type:timestamp"`
+	CreatedAt     time.Time      `json:"-"`
+	DeletedAt     *time.Time     `json:"-"`
 	HostID        string         `json:"host_id" gorm:"type:uuid;"`
 	Host          Host           `json:"-" gorm:"association_autoupdate:false;association_autocreate:false"`
 	Detection     Detection      `json:"detection"`
