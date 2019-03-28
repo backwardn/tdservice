@@ -64,7 +64,7 @@ func (c *Client) GetHost(id string) (*types.Host, error) {
 	return &fetched, nil
 }
 
-func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
+func (c *Client) AddHost(h types.HostInfo) (*types.HostCreateResponse, error) {
 	hosts, err := c.resolvePath("hosts")
 	if err != nil {
 		return nil, err
