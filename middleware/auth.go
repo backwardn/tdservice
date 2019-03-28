@@ -1,12 +1,13 @@
 package middleware
 
 import (
+	"intel/isecl/tdservice/context"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 	"net/http"
 
+	_ "github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	 _"github.com/gorilla/context"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,7 +20,7 @@ func NewBasicAuth(u repository.UserRepository) mux.MiddlewareFunc {
 				// fetch by user
 				user, err := u.Retrieve(types.User{Name: userNameorId})
 				if err != nil {
-                	user, err = u.Retrieve(types.User{ID: userNameorId})
+					user, err = u.Retrieve(types.User{ID: userNameorId})
 					if err != nil {
 						log.WithError(err).Error("BasicAuth failure: could not retrieve user")
 						w.WriteHeader(http.StatusUnauthorized)
@@ -31,6 +32,13 @@ func NewBasicAuth(u repository.UserRepository) mux.MiddlewareFunc {
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
+				roles, err_role := u.GetRoles(types.User{Name: username})
+				if err_role != nil {
+					log.WithError(err).Error("Database error: unable to retrive roles")
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				context.SetUserRoles(r, roles)
 				next.ServeHTTP(w, r)
 			} else {
 				log.Info("No Basic Auth provided")

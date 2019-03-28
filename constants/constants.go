@@ -20,8 +20,13 @@ const (
 )
 
 const (
-	AdminGroupName          = "Administrators"
-	RegisterHostGroupName   = "RegisterHosts"
+	// privileges granted: GET_ANY_HOST, DELETE_ANY_HOST, QUERY_REPORT, VERSION, CREATE_HOST
+	AdminGroupName = "Administrators"
+
+	// privileges granted: CREATE_HOST
+	RegisterHostGroupName = "RegisterHosts"
+
+	// privileges granted: GET_HOST, POST_REPORT
 	HostSelfUpdateGroupName = "HostSelfUpdate"
 )
 

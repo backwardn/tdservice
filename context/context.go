@@ -4,6 +4,7 @@ import (
 	"intel/isecl/tdservice/types"
 
 	"net/http"
+
 	"github.com/gorilla/context"
 )
 
@@ -13,13 +14,13 @@ const (
 	rolesKey = iota
 )
 
-func SetUserRolesInContext(r *http.Request, val types.Roles){
+func SetUserRoles(r *http.Request, val types.Roles) {
 	context.Set(r, rolesKey, val)
 }
 
-func GetUserRolesFromContext(r *http.Request) types.Roles {
+func GetUserRoles(r *http.Request) types.Roles {
 	if rv := context.Get(r, rolesKey); rv != nil {
-        return rv.(types.Roles)
-    }
-    return nil
+		return rv.(types.Roles)
+	}
+	return nil
 }

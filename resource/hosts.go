@@ -4,19 +4,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"intel/isecl/lib/common/validation"
 	"intel/isecl/lib/common/crypt"
+	"intel/isecl/lib/common/validation"
+	consts "intel/isecl/tdservice/constants"
+	"intel/isecl/tdservice/context"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
-	consts "intel/isecl/tdservice/constants"
 
 	"net/http"
 
+	_ "github.com/gorilla/context"
 	"github.com/gorilla/handlers"
 	log "github.com/sirupsen/logrus"
-	
-	"golang.org/x/crypto/bcrypt"
+
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func SetHosts(r *mux.Router, db repository.TDSDatabase) {
@@ -29,6 +31,7 @@ func SetHosts(r *mux.Router, db repository.TDSDatabase) {
 
 func createHost(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
+
 		var h types.Host
 		var valid_err error
 		dec := json.NewDecoder(r.Body)
@@ -45,6 +48,21 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		if valid_err != nil {
 			return fmt.Errorf("hostname validation fail: %s", valid_err.Error())
 		}
+
+		// Check query authority
+		roles := context.GetUserRoles(r)
+		actionAllowed := false
+		for _, role := range roles {
+			if role.Name == consts.AdminGroupName || role.Name == consts.RegisterHostGroupName {
+				actionAllowed = true
+				break
+			}
+		}
+		if !actionAllowed {
+			return &privilegeError{Message: "privilege error: create host",
+				StatusCode: http.StatusForbidden}
+		}
+
 		// validate os
 		if h.OS != "linux" && h.OS != "windows" {
 			return errors.New("os is invalid")
@@ -77,8 +95,8 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		if err != nil {
 			return err
 		}
-		// create the user and roles that represents the new domain. API endpoints that are restricted to updates only from the newly created 
-		// hosts shall be protected with the role. 
+		// create the user and roles that represents the new domain. API endpoints that are restricted to updates only from the newly created
+		// hosts shall be protected with the role.
 		rand, err := crypt.GetRandomBytes(consts.PasswordRandomLength)
 		if err != nil {
 			return err
@@ -88,15 +106,15 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 			return err
 		}
 		host_user_role := types.Role{Name: consts.HostSelfUpdateGroupName,
-									 Domain: created.ID}
+			Domain: created.ID}
 		host_user := types.User{PasswordHash: hash,
-								Roles : []types.Role{host_user_role}}
+			Roles: []types.Role{host_user_role}}
 
 		user, err := db.UserRepository().Create(host_user)
 		if err != nil {
 			return err
 		}
-		resp  := types.HostCreateResponse{}
+		resp := types.HostCreateResponse{}
 		resp.Host = *created
 		resp.User = user.ID
 		resp.Token = rand
@@ -113,7 +131,27 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 
 func getHost(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
+
 		id := mux.Vars(r)["id"]
+
+		// Check query authority
+		roles := context.GetUserRoles(r)
+		actionAllowed := false
+		for _, role := range roles {
+			if role.Name == consts.AdminGroupName {
+				actionAllowed = true
+				break
+			}
+			if role.Name == consts.HostSelfUpdateGroupName && role.Domain == id {
+				actionAllowed = true
+				break
+			}
+		}
+		if !actionAllowed {
+			return &privilegeError{Message: "privilege error: get host",
+				StatusCode: http.StatusForbidden}
+		}
+
 		h, err := db.HostRepository().Retrieve(types.Host{ID: id})
 		if err != nil {
 			log.WithError(err).WithField("id", id).Info("failed to retrieve host")
@@ -132,6 +170,20 @@ func getHost(db repository.TDSDatabase) errorHandlerFunc {
 func deleteHost(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		id := mux.Vars(r)["id"]
+
+		roles := context.GetUserRoles(r)
+		actionAllowed := false
+		for _, role := range roles {
+			if role.Name == consts.AdminGroupName {
+				actionAllowed = true
+				break
+			}
+		}
+		if !actionAllowed {
+			return &privilegeError{Message: "privilege error: delete host",
+				StatusCode: http.StatusForbidden}
+		}
+
 		if err := db.HostRepository().Delete(types.Host{ID: id}); err != nil {
 			log.WithError(err).WithField("id", id).Info("failed to delete host")
 			return err
@@ -143,6 +195,20 @@ func deleteHost(db repository.TDSDatabase) errorHandlerFunc {
 
 func queryHosts(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
+
+		roles := context.GetUserRoles(r)
+		actionAllowed := false
+		for _, role := range roles {
+			if role.Name == consts.AdminGroupName {
+				actionAllowed = true
+				break
+			}
+		}
+		if !actionAllowed {
+			return &privilegeError{Message: "privilege error: query hosts",
+				StatusCode: http.StatusForbidden}
+		}
+
 		// check for query parameters
 		log.WithField("query", r.URL.Query()).Trace("query hosts")
 		hostname := r.URL.Query().Get("hostname")
