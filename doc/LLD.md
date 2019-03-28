@@ -53,7 +53,7 @@ Example Response:
   "version": "1.2.1",
   "build": "201910012012",
   "os": "linux",
-  "status": "online"
+  "status": "Reserve for future implementation"
 }
 ```
 
@@ -73,7 +73,7 @@ Example Response:
         "version": "1.2.1",
         "build": "201910012012",
         "os": "linux",
-        "status": "online",
+        "status": "Reserve for future implementation",
     }, 
     {
         "id": "223e4567-e89b-12d3-a456-426655440000",
@@ -82,7 +82,7 @@ Example Response:
         "version": "1.2.1",
         "build": "201910012012",
         "os": "linux",
-        "status": "offline",
+        "status": "Reserve for future implementation",
     }, 
 ]
 ```
@@ -93,9 +93,8 @@ Available Query parameters:
 - version=(version)
 - build=(build)
 - os=(os)
-- status=(status)
 
-Query parameters can be conjoined in any combination, so for example: `GET /tds/hosts?os=linux&status=offline`
+Query parameters can be conjoined in any combination, so for example: `GET /tds/hosts?version=v1.0.0&os=linux`
 
 ### GET `/tds/hosts/{id-uuidv4}` or GET `/tds/hosts/{hostname}`
 
@@ -115,7 +114,7 @@ Example Response:
     "version": "1.2.1",
     "build": "201910012012",
     "os": "linux",
-    "status": "online",
+    "status": "Reserve for future implementation",
 }
 ```
 

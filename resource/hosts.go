@@ -69,7 +69,7 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		}
 		// add the host
 		// the server, on a separate go routine, will periodically ping all registered hosts to update their status, for now, assume online
-		h.Status = "online"
+		h.Status = "Reserve for future implementation"
 		created, err := db.HostRepository().Create(h)
 		if err != nil {
 			return err
@@ -122,7 +122,7 @@ func queryHosts(db repository.TDSDatabase) errorHandlerFunc {
 		version := r.URL.Query().Get("version")
 		build := r.URL.Query().Get("build")
 		os := r.URL.Query().Get("os")
-		status := r.URL.Query().Get("status")
+		// status := r.URL.Query().Get("status")
 
 		filter := types.Host{
 			HostInfo: types.HostInfo{
@@ -131,7 +131,7 @@ func queryHosts(db repository.TDSDatabase) errorHandlerFunc {
 				Build:    build,
 				OS:       os,
 			},
-			Status: status,
+			Status: "Reserve for future implementation",
 		}
 
 		hosts, err := db.HostRepository().RetrieveAll(filter)
