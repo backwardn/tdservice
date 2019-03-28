@@ -12,7 +12,6 @@ require (
 	golang.org/x/crypto v0.0.0-20190219172222-a4c6cb3142f2
 	gopkg.in/yaml.v2 v2.2.2
 	intel/isecl/lib/common v0.0.0
-	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 )
 
 replace intel/isecl/lib/common => gitlab.devtools.intel.com/sst/isecl/lib/common v0.0.0-20190319012411-272076869a86

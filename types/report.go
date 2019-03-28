@@ -5,9 +5,6 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/jinzhu/gorm"
-	"github.com/satori/go.uuid"
-	"errors"
 )
 
 type CVE struct {
@@ -41,18 +38,6 @@ type Report struct {
 	Host          Host           `json:"-" gorm:"association_autoupdate:false;association_autocreate:false"`
 	Detection     Detection      `json:"detection"`
 	DetectionJSON postgres.Jsonb `json:"-"`
-}
-
-func (r *Report) BeforeCreate(scope *gorm.Scope) error {
-
-	id, err := uuid.NewV4()
-	if err != nil {
-		return errors.New("unable to create uuid")
-	}
-	if err = scope.SetColumn("id", id.String()); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (r *Report) BeforeSave() (err error) {
