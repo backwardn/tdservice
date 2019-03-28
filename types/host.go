@@ -19,7 +19,7 @@ type Host struct {
 }
 
 type HostCreateResponse struct {
-	HostInfo
+	Host
 	User  string `json:user`
 	Token []byte `json:token`
 }

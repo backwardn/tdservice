@@ -97,7 +97,7 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 			return err
 		}
 		resp  := types.HostCreateResponse{}
-		resp.HostInfo = created.HostInfo
+		resp.Host = *created
 		resp.User = user.ID
 		resp.Token = rand
 
