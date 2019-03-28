@@ -44,17 +44,17 @@ CONFIG_PATH=/etc/$COMPONENT_NAME/
 
 mkdir -p $BIN_PATH && chown tds:tds $BIN_PATH/
 cp $COMPONENT_NAME $BIN_PATH/
-chmod 775 $BIN_PATH/*
+chmod 750 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 # Create configuration directory in /etc
 mkdir -p $CONFIG_PATH && chown tds:tds $CONFIG_PATH
-chmod 775 $CONFIG_PATH
+chmod 700 $CONFIG_PATH
 chmod g+s $CONFIG_PATH
 
 # Create logging dir in /var/log
 mkdir -p $LOG_PATH && chown tds:tds $LOG_PATH
-chmod 775 $LOG_PATH
+chmod 661 $LOG_PATH
 chmod g+s $LOG_PATH
 
 # Install systemd script
