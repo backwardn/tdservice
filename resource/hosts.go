@@ -93,7 +93,6 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 								Roles : []types.Role{host_user_role}}
 
 		user, err := db.UserRepository().Create(host_user)
-		//_, err = db.UserRepository().Create(host_user)
 		if err != nil {
 			return err
 		}
@@ -101,6 +100,7 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		resp.HostInfo = created.HostInfo
 		resp.User = user.ID
 		resp.Token = rand
+
 		w.WriteHeader(http.StatusCreated) // HTTP 201
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(&resp)

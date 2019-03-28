@@ -26,7 +26,7 @@ func (r *PostgresUserRepository) Create(u types.User) (*types.User, error) {
 }
 
 func (r *PostgresUserRepository) Retrieve(u types.User) (*types.User, error) {
-	err := r.db.First(&u).Error
+	err := r.db.Where(&u).First(&u).Error
 	return &u, err
 }
 

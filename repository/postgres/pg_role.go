@@ -16,7 +16,7 @@ func (r *PostgresRoleRepository) Create(role types.Role) (*types.Role, error) {
 }
 
 func (r *PostgresRoleRepository) Retrieve(role types.Role) (*types.Role, error) {
-	err := r.db.First(&role).Error
+	err := r.db.Where(&role).First(&role).Error
 	return &role, err
 }
 

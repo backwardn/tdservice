@@ -86,7 +86,7 @@ func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
 		return nil, fmt.Errorf("failed to create host: %s: HTTP Code: %d", string(msg), rsp.StatusCode)
 	}
 	// parse it and return
-	var created types.Host
+	var created types.HostCreateResponse
 	err = json.NewDecoder(rsp.Body).Decode(&created)
 	if err != nil {
 		return nil, err

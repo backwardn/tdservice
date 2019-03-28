@@ -14,6 +14,7 @@ func NewBasicAuth(u repository.UserRepository) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			username, password, ok := r.BasicAuth()
+			log.Debug("Attempting to authenticate user: ", username)
 			if ok {
 				// fetch by user
 				user, err := u.Retrieve(types.User{Name: username})
@@ -24,7 +25,7 @@ func NewBasicAuth(u repository.UserRepository) mux.MiddlewareFunc {
 					return
 				}
 				if err := user.CheckPassword([]byte(password)); err != nil {
-					log.WithError(err).Error("BasicAuth failure: password mismatch")
+					log.WithError(err).Error("BasicAuth failure: password mismatch, user", username)
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
