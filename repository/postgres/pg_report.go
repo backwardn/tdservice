@@ -12,7 +12,13 @@ type PostgresReportRepository struct {
 }
 
 func (r *PostgresReportRepository) Create(report types.Report) (*types.Report, error) {
-	var err error
+
+	uuid, err := repository.UUID()
+	if err == nil {
+		report.ID = uuid
+	} else {
+		return &report, err
+	}
 	err = r.db.Create(&report).Error
 	return &report, err
 }

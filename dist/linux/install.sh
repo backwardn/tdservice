@@ -19,8 +19,6 @@ export TDS_DB_USERNAME
 export TDS_DB_PASSWORD
 export TDS_DB_NAME
 
-export TDS_DB_PORT
-
 export TDS_ADMIN_USERNAME
 export TDS_ADMIN_PASSWORD
 
@@ -31,10 +29,10 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-echo Setting up Threat Detection Service Linux User...
+echo "Setting up Threat Detection Service Linux User..."
 id -u tds 2> /dev/null || useradd tds
 
-echo Installing Threat Detection Service...
+echo "Installing Threat Detection Service..."
 
 COMPONENT_NAME=tdservice
 PRODUCT_HOME=/opt/$COMPONENT_NAME
@@ -43,7 +41,7 @@ LOG_PATH=/var/log/$COMPONENT_NAME/
 CONFIG_PATH=/etc/$COMPONENT_NAME/
 
 mkdir -p $BIN_PATH && chown tds:tds $BIN_PATH/
-cp $COMPONENT_NAME $BIN_PATH/
+cp $COMPONENT_NAME $BIN_PATH/ && chown tds:tds $BIN_PATH/*
 chmod 750 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
@@ -58,7 +56,7 @@ chmod 661 $LOG_PATH
 chmod g+s $LOG_PATH
 
 # Install systemd script
-cp tdservice.service $PRODUCT_HOME && chown tds:tds $PRODUCT_HOME/tdservice.service
+cp tdservice.service $PRODUCT_HOME && chown tds:tds $PRODUCT_HOME/tdservice.service && chown tds:tds $PRODUCT_HOME
 
 # Enable systemd service
 systemctl enable $PRODUCT_HOME/tdservice.service
@@ -68,12 +66,12 @@ if [[ -z $TDS_NOSETUP ]]; then
     tdservice setup all
     SETUPRESULT=$?
     if [ ${SETUPRESULT} == 0 ]; then 
-        echo Installation completed successfully!
+        echo "Installation completed successfully!"
         systemctl start tdservice
     else 
-        echo Installation completed with errors
+        echo "Installation completed with errors"
     fi
 else 
-    echo flag TDS_NOSETUP is defined, skipping setup
-    echo Installation completed successfully!
+    echo "TDS_NOSETUP is defined, skipping setup"
+    echo "Installation completed successfully!"
 fi
