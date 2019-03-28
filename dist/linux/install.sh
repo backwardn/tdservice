@@ -43,7 +43,7 @@ LOG_PATH=/var/log/$COMPONENT_NAME/
 CONFIG_PATH=/etc/$COMPONENT_NAME/
 
 mkdir -p $BIN_PATH && chown tds:tds $BIN_PATH/
-cp $COMPONENT_NAME $BIN_PATH/
+cp $COMPONENT_NAME $BIN_PATH/ && chown tds:tds $BIN_PATH/*
 chmod 750 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
