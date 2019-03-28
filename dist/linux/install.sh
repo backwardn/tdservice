@@ -43,7 +43,7 @@ LOG_PATH=/var/log/$COMPONENT_NAME/
 CONFIG_PATH=/etc/$COMPONENT_NAME/
 
 mkdir -p $BIN_PATH && chown tds:tds $BIN_PATH/
-cp $COMPONENT_NAME $BIN_PATH/
+cp $COMPONENT_NAME $BIN_PATH/ && chown tds:tds $BIN_PATH/*
 chmod 750 $BIN_PATH/*
 ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
@@ -58,7 +58,7 @@ chmod 661 $LOG_PATH
 chmod g+s $LOG_PATH
 
 # Install systemd script
-cp tdservice.service $PRODUCT_HOME && chown tds:tds $PRODUCT_HOME/tdservice.service
+cp tdservice.service $PRODUCT_HOME && chown tds:tds $PRODUCT_HOME/tdservice.service && chown tds:tds $PRODUCT_HOME
 
 # Enable systemd service
 systemctl enable $PRODUCT_HOME/tdservice.service
