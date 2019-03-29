@@ -14,22 +14,23 @@ import (
 func NewBasicAuth(u repository.UserRepository) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			userNameorId, password, ok := r.BasicAuth()
-			log.Debug("Attempting to authenticate user: ", userNameorId)
+			// the username from r.BasicAuth() is either username or host ID on TDAgent
+			username, password, ok := r.BasicAuth()
+			log.Debug("Attempting to authenticate user: ", username)
 			if ok {
 				// fetch by user
-				user, err := getUserByNameOrId(userNameOrId, u)
+				user, err := getUserByNameOrId(username, u)
 				if err != nil {
 					log.WithError(err).Error("BasicAuth failure: could not retrieve user")
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
 				if err := user.CheckPassword([]byte(password)); err != nil {
-					log.WithError(err).Error("BasicAuth failure: password mismatch, user", userNameorId)
+					log.WithError(err).Error("BasicAuth failure: password mismatch, user", username)
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
-				roles, err_role := getRolesByNameOrID(userNameOrId, u)
+				roles, err_role := getRolesByNameOrID(username, u)
 				if err_role != nil {
 					log.WithError(err).Error("Database error: unable to retrive roles")
 					w.WriteHeader(http.StatusInternalServerError)

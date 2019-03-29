@@ -41,7 +41,7 @@ import (
 )
 
 type App struct {
-	HomeDir      string
+	HomeDir        string
 	ConfigDir      string
 	RunDir         string
 	LogDir         string
