@@ -7,7 +7,8 @@ import (
 	"intel/isecl/tdservice/types"
 	"net/http"
 	"time"
-
+	"bytes"
+	"strings"
 	"github.com/gorilla/handlers"
 
 	"github.com/gorilla/mux"
@@ -23,9 +24,11 @@ func SetReports(r *mux.Router, db repository.TDSDatabase) {
 func createReport(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var report types.Report
-		decoder := json.NewDecoder(r.Body)
-		decoder.DisallowUnknownFields()
-		err := decoder.Decode(&report)
+		reportsBuffer := new(bytes.Buffer)
+		reportsBuffer.ReadFrom(r.Body)
+		dec := json.NewDecoder(strings.NewReader(reportsBuffer.String()))
+		dec.DisallowUnknownFields()
+		err := dec.Decode(&report)
 		if err != nil {
 			log.WithError(err).Error("failed to decode input body as types.Report")
 			return err
