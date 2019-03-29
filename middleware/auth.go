@@ -18,21 +18,18 @@ func NewBasicAuth(u repository.UserRepository) mux.MiddlewareFunc {
 			log.Debug("Attempting to authenticate user: ", userNameorId)
 			if ok {
 				// fetch by user
-				user, err := u.Retrieve(types.User{Name: userNameorId})
+				user, err := getUserByNameOrId(userNameOrId, u)
 				if err != nil {
-					user, err = u.Retrieve(types.User{ID: userNameorId})
-					if err != nil {
-						log.WithError(err).Error("BasicAuth failure: could not retrieve user")
-						w.WriteHeader(http.StatusUnauthorized)
-						return
-					}
+					log.WithError(err).Error("BasicAuth failure: could not retrieve user")
+					w.WriteHeader(http.StatusUnauthorized)
+					return
 				}
 				if err := user.CheckPassword([]byte(password)); err != nil {
 					log.WithError(err).Error("BasicAuth failure: password mismatch, user", userNameorId)
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
-				roles, err_role := u.GetRoles(types.User{Name: username})
+				roles, err_role := getRolesByNameOrID(userNameOrId, u)
 				if err_role != nil {
 					log.WithError(err).Error("Database error: unable to retrive roles")
 					w.WriteHeader(http.StatusInternalServerError)
@@ -46,4 +43,26 @@ func NewBasicAuth(u repository.UserRepository) mux.MiddlewareFunc {
 			}
 		})
 	}
+}
+
+func getUserByNameOrId(userNameOrId string, u repository.UserRepository) (*types.User, error) {
+	user, err := u.Retrieve(types.User{Name: userNameOrId})
+	if err != nil {
+		user, err = u.Retrieve(types.User{ID: userNameOrId})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return user, nil
+}
+
+func getRolesByNameOrID(userNameOrId string, u repository.UserRepository) (userRoles []types.Role, err error) {
+	roles, err_role := u.GetRoles(types.User{Name: userNameOrId})
+	if err_role != nil || len(roles) == 0 {
+		roles, err_role = u.GetRoles(types.User{ID: userNameOrId})
+		if err != nil {
+			return nil, err_role
+		}
+	}
+	return roles, nil
 }

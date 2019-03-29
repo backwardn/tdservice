@@ -2,6 +2,7 @@ package resource
 
 import (
 	"encoding/json"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"intel/isecl/lib/common/crypt"
@@ -101,7 +102,9 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		if err != nil {
 			return err
 		}
-		hash, err := bcrypt.GenerateFromPassword(rand, bcrypt.DefaultCost)
+		
+		randStr := base64.StdEncoding.EncodeToString(rand)
+		hash, err := bcrypt.GenerateFromPassword([]byte(randStr), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
@@ -117,7 +120,7 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		resp := types.HostCreateResponse{}
 		resp.Host = *created
 		resp.User = user.ID
-		resp.Token = rand
+		resp.Token = randStr
 
 		w.WriteHeader(http.StatusCreated) // HTTP 201
 		w.Header().Set("Content-Type", "application/json")
@@ -133,7 +136,6 @@ func getHost(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 
 		id := mux.Vars(r)["id"]
-
 		// Check query authority
 		roles := context.GetUserRoles(r)
 		actionAllowed := false
@@ -195,7 +197,6 @@ func deleteHost(db repository.TDSDatabase) errorHandlerFunc {
 
 func queryHosts(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
-
 		roles := context.GetUserRoles(r)
 		actionAllowed := false
 		for _, role := range roles {

@@ -21,5 +21,5 @@ type Host struct {
 type HostCreateResponse struct {
 	Host
 	User  string `json:user`
-	Token []byte `json:token`
+	Token string `json:token`
 }
