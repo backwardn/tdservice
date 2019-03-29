@@ -15,6 +15,7 @@ import (
 	"intel/isecl/tdservice/resource"
 	"intel/isecl/tdservice/tasks"
 	"intel/isecl/tdservice/version"
+	e"intel/isecl/lib/common/exec"
 	"io"
 	"net/http"
 	"os"
@@ -346,6 +347,7 @@ func (a *App) status() error {
 }
 
 func (a *App) uninstall(keepConfig bool) {
+	removeService()
 	err := os.Remove(a.executablePath())
 	if err != nil {
 		log.WithError(err).Error("error removing executable")
@@ -370,6 +372,13 @@ func (a *App) uninstall(keepConfig bool) {
 	}
 	fmt.Fprintln(a.consoleWriter(), "Threat Detection Service uninstalled")
 	a.stop()
+}
+func removeService() {
+	_, _, err := e.RunCommandWithTimeout(constants.ServiceRemoveCmd, 5)
+	if err != nil {
+		fmt.Println("Could not remove Threat Detection Service")
+		fmt.Println("Error : ", err)
+	}
 }
 
 func validateCmdAndEnv(env_names_cmd_opts map[string]string, flags *flag.FlagSet) error {
