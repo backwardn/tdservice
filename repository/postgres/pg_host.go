@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 
 	"github.com/jinzhu/gorm"
@@ -11,7 +12,14 @@ type PostgresHostRepository struct {
 }
 
 func (r *PostgresHostRepository) Create(host types.Host) (*types.Host, error) {
-	err := r.db.Create(&host).Error
+
+	uuid, err := repository.UUID()
+	if err == nil {
+		host.ID = uuid
+	} else {
+		return &host, err
+	}
+	err = r.db.Create(&host).Error
 	return &host, err
 }
 

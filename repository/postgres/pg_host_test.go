@@ -42,7 +42,7 @@ func createHost(hostname string, hr repository.HostRepository) (*types.Host, err
 	host := types.Host{}
 	host.Hostname = hostname
 	host.OS = "linux"
-	host.Status = "online"
+	host.Status = "Reserve for future implementation"
 	host.Version = "1.0"
 	host.Build = "1234"
 	return hr.Create(host)
@@ -126,7 +126,7 @@ func TestHostUpdate(t *testing.T) {
 	host := types.Host{}
 	host.Hostname = "10.0.0.1"
 	host.OS = "linux"
-	host.Status = "online"
+	host.Status = "Reserve for future implementation"
 	host.Version = "1.0"
 	host.Build = "1234"
 	created, err := db.HostRepository().Create(host)
@@ -147,7 +147,7 @@ func TestHostDelete(t *testing.T) {
 	host := types.Host{}
 	host.Hostname = "10.0.0.1"
 	host.OS = "linux"
-	host.Status = "online"
+	host.Status = "Reserve for future implementation"
 	host.Version = "1.0"
 	host.Build = "1234"
 	created, err := db.HostRepository().Create(host)
@@ -171,7 +171,7 @@ func TestHostDeleteWithReport(t *testing.T) {
 	host := types.Host{}
 	host.Hostname = "10.0.0.1"
 	host.OS = "linux"
-	host.Status = "online"
+	host.Status = "Reserve for future implementation"
 	host.Version = "1.0"
 	host.Build = "1234"
 	created, err := db.HostRepository().Create(host)

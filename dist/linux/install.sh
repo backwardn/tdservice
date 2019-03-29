@@ -19,8 +19,6 @@ export TDS_DB_USERNAME
 export TDS_DB_PASSWORD
 export TDS_DB_NAME
 
-export TDS_DB_PORT
-
 export TDS_ADMIN_USERNAME
 export TDS_ADMIN_PASSWORD
 
@@ -31,45 +29,49 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-echo Setting up Threat Detection Service Linux User...
+echo "Setting up Threat Detection Service Linux User..."
 id -u tds 2> /dev/null || useradd tds
 
-echo Installing Threat Detection Service...
+echo "Installing Threat Detection Service..."
 
-cp tdservice /usr/bin/tdservice
-chmod +x /usr/bin/tdservice 
-chmod 755 /usr/bin/tdservice
+COMPONENT_NAME=tdservice
+PRODUCT_HOME=/opt/$COMPONENT_NAME
+BIN_PATH=$PRODUCT_HOME/bin
+LOG_PATH=/var/log/$COMPONENT_NAME/
+CONFIG_PATH=/etc/$COMPONENT_NAME/
+
+mkdir -p $BIN_PATH && chown tds:tds $BIN_PATH/
+cp $COMPONENT_NAME $BIN_PATH/ && chown tds:tds $BIN_PATH/*
+chmod 750 $BIN_PATH/*
+ln -sfT $BIN_PATH/$COMPONENT_NAME /usr/bin/$COMPONENT_NAME
 
 # Create configuration directory in /etc
-mkdir -p /etc/tdservice && chown tds:tds /etc/tdservice
-chmod 775 /etc/tdservice
-chmod g+s /etc/tdservice
-# Create data dir in /var/lib
-mkdir -p /var/lib/tdservice && chown tds:tds /var/lib/tdservice
-chmod 775 /var/lib/tdservice
-chmod g+s /var/lib/tdservice
+mkdir -p $CONFIG_PATH && chown tds:tds $CONFIG_PATH
+chmod 700 $CONFIG_PATH
+chmod g+s $CONFIG_PATH
+
 # Create logging dir in /var/log
-mkdir -p /var/log/tdservice && chown tds:tds /var/log/tdservice
-chmod 775 /var/log/tdservice
-chmod g+s /var/log/tdservice
+mkdir -p $LOG_PATH && chown tds:tds $LOG_PATH
+chmod 661 $LOG_PATH
+chmod g+s $LOG_PATH
 
 # Install systemd script
-cp tdservice.service /etc/systemd/system/tdservice.service
+cp tdservice.service $PRODUCT_HOME && chown tds:tds $PRODUCT_HOME/tdservice.service && chown tds:tds $PRODUCT_HOME
 
 # Enable systemd service
-systemctl enable tdservice
+systemctl enable $PRODUCT_HOME/tdservice.service
 
 # check if TDS_NOSETUP is defined
 if [[ -z $TDS_NOSETUP ]]; then 
     tdservice setup all
     SETUPRESULT=$?
     if [ ${SETUPRESULT} == 0 ]; then 
-        echo Installation completed successfully!
+        echo "Installation completed successfully!"
         systemctl start tdservice
     else 
-        echo Installation completed with errors
+        echo "Installation completed with errors"
     fi
 else 
-    echo flag TDS_NOSETUP is defined, skipping setup
-    echo Installation completed successfully!
+    echo "TDS_NOSETUP is defined, skipping setup"
+    echo "Installation completed successfully!"
 fi
