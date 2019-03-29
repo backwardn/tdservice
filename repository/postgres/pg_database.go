@@ -15,7 +15,7 @@ type PostgresDatabase struct {
 }
 
 func (pd *PostgresDatabase) Migrate() error {
-	pd.DB.AutoMigrate(types.Host{}, types.Report{}, types.User{})
+	pd.DB.AutoMigrate(types.Host{}, types.Report{}, types.User{}, types.Role{})
 	pd.DB.Table("reports").
 		AddForeignKey("host_id", "hosts(id)", "SET NULL", "SET NULL")
 	return nil

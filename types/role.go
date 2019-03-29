@@ -3,7 +3,7 @@ package types
 import "time"
 
 type Role struct {
-	ID        string    `json:"id" gorm:"primary_key;type:uuid;default:uuid_generate_v4()"`
+	ID        string    `json:"id" gorm:"primary_key;type:uuid"`
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 
