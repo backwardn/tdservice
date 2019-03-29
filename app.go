@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
@@ -286,7 +287,12 @@ func (a *App) startServer() error {
 			s(r, tdsDB)
 		}
 	}(resource.SetHosts, resource.SetReports, resource.SetVersion)
-
+	
+	tlsconfig := &tls.Config{
+                MinVersion:               tls.VersionTLS12,
+                CipherSuites:             []uint16{tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                                                  tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,},
+        }
 	// Setup signal handlers to gracefully handle termination
 	stop := make(chan os.Signal)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
@@ -295,6 +301,7 @@ func (a *App) startServer() error {
 		Addr:     fmt.Sprintf(":%d", c.Port),
 		Handler:  handlers.RecoveryHandler(handlers.RecoveryLogger(httpLog), handlers.PrintRecoveryStack(true))(handlers.CombinedLoggingHandler(a.httpLogWriter(), r)),
 		ErrorLog: httpLog,
+		TLSConfig: tlsconfig,
 	}
 
 	// dispatch web server go routine
