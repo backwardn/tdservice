@@ -108,7 +108,11 @@ func createHost(db repository.TDSDatabase) errorHandlerFunc {
 		if err != nil {
 			return err
 		}
-		host_user_role := types.Role{Name: consts.HostSelfUpdateGroupName,
+		uuid, err := repository.UUID()
+		if err != nil {
+			return err
+		}
+		host_user_role := types.Role{ID: uuid, Name: consts.HostSelfUpdateGroupName,
 			Domain: created.ID}
 		host_user := types.User{PasswordHash: hash,
 			Roles: []types.Role{host_user_role}}

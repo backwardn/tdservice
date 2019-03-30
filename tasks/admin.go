@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"intel/isecl/lib/common/setup"
 	"intel/isecl/lib/common/validation"
-        consts "intel/isecl/tdservice/constants"
+	consts "intel/isecl/tdservice/constants"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 	"io"
@@ -26,14 +26,14 @@ func (a Admin) Run(c setup.Context) error {
 	fmt.Fprintln(a.ConsoleWriter, "Running admin setup...")
 	envUser, _ := c.GetenvString("TDS_ADMIN_USERNAME", "Username for admin authentication")
 	envPass, _ := c.GetenvSecret("TDS_ADMIN_PASSWORD", "Password for admin authentication")
-        envRegHostUser, _ := c.GetenvString("TDS_REG_HOST_USERNAME", "Username for register-host-user authentication")
-        envRegHostPass, _ := c.GetenvSecret("TDS_REG_HOST_PASSWORD", "Password for register-host-user authentication")
+	envRegHostUser, _ := c.GetenvString("TDS_REG_HOST_USERNAME", "Username for register-host-user authentication")
+	envRegHostPass, _ := c.GetenvSecret("TDS_REG_HOST_PASSWORD", "Password for register-host-user authentication")
 	fs := flag.NewFlagSet("admin", flag.ContinueOnError)
 	force := fs.Bool("force", false, "force creation")
 	username := fs.String("admin-user", envUser, "Username for admin authentication")
 	password := fs.String("admin-pass", envPass, "Password for admin authentication")
-        regHostUsername := fs.String("reg-host-user", envRegHostUser,  "Username for RegisterHostUser authentication")
-        regHostUserPassword := fs.String("reg-host-password", envRegHostPass,  "Password for RegisterHostUser authentication")
+	regHostUsername := fs.String("reg-host-user", envRegHostUser, "Username for RegisterHostUser authentication")
+	regHostUserPassword := fs.String("reg-host-password", envRegHostPass, "Password for RegisterHostUser authentication")
 	err := fs.Parse(a.Flags)
 	if err != nil {
 		return err
@@ -47,19 +47,19 @@ func (a Admin) Run(c setup.Context) error {
 	if *password == "" {
 		return errors.New("admin setup: Password cannot be empty")
 	}
-        if *regHostUsername == "" {
-                return errors.New("admin setup: Username for RegisterHostUser cannot be empty")
-        }
-        if *regHostUserPassword == "" {
-                return errors.New("admin setup: Password for for RegisterHostUser cannot be empty")
-        }
+	if *regHostUsername == "" {
+		return errors.New("admin setup: Username for RegisterHostUser cannot be empty")
+	}
+	if *regHostUserPassword == "" {
+		return errors.New("admin setup: Password for for RegisterHostUser cannot be empty")
+	}
 	valid_err := validation.ValidateAccount(*username, *password)
 	if valid_err != nil {
 		return valid_err
 	}
 	valid_err = validation.ValidateAccount(*regHostUsername, *regHostUserPassword)
 	if valid_err != nil {
-			return valid_err
+		return valid_err
 	}
 
 	db, err := a.DatabaseFactory()
@@ -72,21 +72,31 @@ func (a Admin) Run(c setup.Context) error {
 	if *force {
 		// if force, delete any users with the name
 		db.UserRepository().Delete(types.User{Name: *username})
-                db.UserRepository().Delete(types.User{Name: *regHostUsername})
+		db.UserRepository().Delete(types.User{Name: *regHostUsername})
 	}
+	uuid, err := repository.UUID()
+	if err != nil {
+		log.WithError(err).Error("failed to create uuid for admin role")
+		return err
+	}
+	adminRole := types.Role{ID: uuid, Name: consts.AdminGroupName}
 
-    adminRole := types.Role{Name: consts.AdminGroupName}
-	db.UserRepository().Create(types.User{Name:  *username, 
-                                              PasswordHash: hash,
-                                              Roles: []types.Role{adminRole},
-                                             })
+	db.UserRepository().Create(types.User{Name: *username,
+		PasswordHash: hash,
+		Roles:        []types.Role{adminRole},
+	})
 
-	registerHostRole := types.Role{Name: consts.RegisterHostGroupName}
+	uuid, err = repository.UUID()
+	if err != nil {
+		log.WithError(err).Error("failed to create uuid for register host role")
+		return err
+	}
+	registerHostRole := types.Role{ID: uuid, Name: consts.RegisterHostGroupName}
 	hash, _ = bcrypt.GenerateFromPassword([]byte(*regHostUserPassword), bcrypt.DefaultCost)
 	db.UserRepository().Create(types.User{Name: *regHostUsername,
-					      PasswordHash: hash,
-					      Roles: []types.Role{registerHostRole},
-	   				    })
+		PasswordHash: hash,
+		Roles:        []types.Role{registerHostRole},
+	})
 	return nil
 }
 
