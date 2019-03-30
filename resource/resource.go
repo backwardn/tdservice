@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 package resource
 
 import (
@@ -22,10 +26,23 @@ func (ehf errorHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, t.Message, t.StatusCode)
 		case resourceError:
 			http.Error(w, t.Message, t.StatusCode)
+		case *privilegeError:
+			http.Error(w, t.Message, t.StatusCode)
+		case privilegeError:
+			http.Error(w, t.Message, t.StatusCode)
 		default:
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}
+}
+
+type privilegeError struct {
+	StatusCode int
+	Message    string
+}
+
+func (e privilegeError) Error() string {
+	return fmt.Sprintf("%d: %s", e.StatusCode, e.Message)
 }
 
 type resourceError struct {

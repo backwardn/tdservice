@@ -19,8 +19,13 @@ export TDS_DB_USERNAME
 export TDS_DB_PASSWORD
 export TDS_DB_NAME
 
+export TDS_PORT
+
 export TDS_ADMIN_USERNAME
 export TDS_ADMIN_PASSWORD
+
+export TDS_REG_HOST_USERNAME
+export TDS_REG_HOST_PASSWORD
 
 export TDS_TLS_HOSTS
 
@@ -59,7 +64,9 @@ chmod g+s $LOG_PATH
 cp tdservice.service $PRODUCT_HOME && chown tds:tds $PRODUCT_HOME/tdservice.service && chown tds:tds $PRODUCT_HOME
 
 # Enable systemd service
+systemctl disable tdservice.service > /dev/null 2>&1
 systemctl enable $PRODUCT_HOME/tdservice.service
+systemctl daemon-reload
 
 # check if TDS_NOSETUP is defined
 if [[ -z $TDS_NOSETUP ]]; then 

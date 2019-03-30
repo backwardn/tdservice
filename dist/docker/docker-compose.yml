@@ -26,6 +26,8 @@ services:
          TDS_DB_PASSWORD: ${TDS_DB_PASSWORD:-test}
          TDS_ADMIN_USERNAME: ${TDS_ADMIN_USERNAME:-admin}
          TDS_ADMIN_PASSWORD: ${TDS_ADMIN_PASSWORD:-password}
+         TDS_REG_HOST_USERNAME: ${TDS_REG_HOST_USERNAME:- reg-host-user}
+         TDS_REG_HOST_PASSWORD: ${TDS_REG_HOST_PASSWORD:- password}
         #
 
       volumes:

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 package mock
 
 import (
@@ -31,10 +35,19 @@ func (m *MockUserRepository) Update(user types.User) error {
 	}
 	return nil
 }
-
+ 
 func (m *MockUserRepository) Delete(user types.User) error {
 	if m.DeleteFunc != nil {
 		return m.DeleteFunc(user)
 	}
 	return nil
 }
+
+func (m *MockUserRepository) GetRoles(user types.User) ([]types.Role, error) {
+	return nil, nil
+}
+
+func (m *MockUserRepository) AddRoles(u types.User, roles []types.Role) error {
+	return nil
+}
+

@@ -1,8 +1,14 @@
+/*
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 package resource
 
 import (
 	"encoding/json"
 	"errors"
+	"intel/isecl/tdservice/constants"
+	"intel/isecl/tdservice/context"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/types"
 	"net/http"
@@ -37,6 +43,21 @@ func createReport(db repository.TDSDatabase) errorHandlerFunc {
 			log.Error("report is not associated with a HostID")
 			return errors.New("report is not associated with a HostID")
 		}
+
+		// Check query authority
+		roles := context.GetUserRoles(r)
+		actionAllowed := false
+		for _, role := range roles {
+			if role.Name == constants.HostSelfUpdateGroupName && role.Domain == report.HostID {
+				actionAllowed = true
+				break
+			}
+		}
+		if !actionAllowed {
+			return &privilegeError{Message: "privilege error: create report",
+				StatusCode: http.StatusForbidden}
+		}
+
 		log.WithField("report", report).Info("creating report")
 		created, err := db.ReportRepository().Create(report)
 
@@ -53,6 +74,21 @@ func createReport(db repository.TDSDatabase) errorHandlerFunc {
 
 func queryReport(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
+
+		// Check query authority
+		roles := context.GetUserRoles(r)
+		actionAllowed := false
+		for _, role := range roles {
+			if role.Name == constants.AdminGroupName {
+				actionAllowed = true
+				break
+			}
+		}
+		if !actionAllowed {
+			return &privilegeError{Message: "privilege error: query report",
+				StatusCode: http.StatusForbidden}
+		}
+
 		q := r.URL.Query()
 		hostname := q.Get("hostname")
 		hostID := q.Get("hostid")
@@ -93,6 +129,21 @@ func queryReport(db repository.TDSDatabase) errorHandlerFunc {
 func getReport(db repository.TDSDatabase) errorHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		id := mux.Vars(r)["id"]
+
+		// Check query authority
+		roles := context.GetUserRoles(r)
+		actionAllowed := false
+		for _, role := range roles {
+			if role.Name == constants.AdminGroupName {
+				actionAllowed = true
+				break
+			}
+		}
+		if !actionAllowed {
+			return &privilegeError{Message: "privilege error: get report",
+				StatusCode: http.StatusForbidden}
+		}
+
 		h, err := db.ReportRepository().Retrieve(types.Report{ID: id})
 		if err != nil {
 			return err

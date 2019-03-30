@@ -1,8 +1,13 @@
+/*
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 package resource
 
 import (
 	"bytes"
 	"encoding/json"
+	"intel/isecl/tdservice/context"
 	"intel/isecl/tdservice/repository"
 	"intel/isecl/tdservice/repository/mock"
 	"intel/isecl/tdservice/types"
@@ -14,12 +19,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+
+
 func TestCreateReport(t *testing.T) {
+	user_role := types.Role {
+                      Name: "Administrators",
+                     }
 	assert := assert.New(t)
 	db := new(mock.MockDatabase)
 	var reportCreated bool
-
-	r := setupRouter(db)
+	user_role = types.Role {
+                        Name: "HostSelfUpdate",
+			Domain: "2",
+                     }
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 
 	report := types.Report{
@@ -46,6 +59,7 @@ func TestCreateReport(t *testing.T) {
 
 	req := httptest.NewRequest("POST", "/tds/reports", bytes.NewBuffer(reportJSON))
 	req.Header.Set("Content-Type", "application/json")
+	context.SetUserRoles(req, []types.Role{user_role})
 	r.ServeHTTP(recorder, req)
 	assert.Equal(http.StatusCreated, recorder.Code)
 	assert.Equal("application/json", recorder.Header().Get("Content-Type"))
@@ -80,7 +94,7 @@ func TestRetrieveReport(t *testing.T) {
 		assert.Equal("1", h.ID)
 		return &report, nil
 	}
-	r := setupRouter(db)
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/tds/reports/1", nil)
 	r.ServeHTTP(recorder, req)
@@ -115,7 +129,7 @@ func TestQueryReports(t *testing.T) {
 		assert.Equal(exTo, f.To)
 		return []types.Report{report}, nil
 	}
-	r := setupRouter(db)
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/tds/reports?hostname=10.1.2.3&from=2002-10-02T15:00:00Z&to=2020-10-02T15:00:00Z", nil)
 	r.ServeHTTP(recorder, req)
@@ -125,7 +139,7 @@ func TestQueryReports(t *testing.T) {
 func TestBadQueryReports(t *testing.T) {
 	assert := assert.New(t)
 	db := new(mock.MockDatabase)
-	r := setupRouter(db)
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/tds/reports?from=NOTRFC3339", nil)
 	r.ServeHTTP(recorder, req)
