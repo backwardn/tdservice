@@ -47,7 +47,6 @@ import (
 type App struct {
 	HomeDir        string
 	ConfigDir      string
-	RunDir         string
 	LogDir         string
 	ExecutablePath string
 	Config         *config.Configuration
@@ -152,13 +151,6 @@ func (a *App) logDir() string {
 		return a.ConfigDir
 	}
 	return constants.LogDir
-}
-
-func (a *App) runDir() string {
-	if a.RunDir != "" {
-		return a.RunDir
-	}
-	return constants.RunDir
 }
 
 func (a *App) configureLogs() {
@@ -363,25 +355,26 @@ func (a *App) status() error {
 }
 
 func (a *App) uninstall(keepConfig bool) {
+	fmt.Println("Uninstalling Threat Detection Service")
 	removeService()
+	fmt.Println("removing : ", a.executablePath())
 	err := os.Remove(a.executablePath())
 	if err != nil {
 		log.WithError(err).Error("error removing executable")
 	}
 	if !keepConfig {
+		fmt.Println("removing : ", a.configDir())
 		err = os.RemoveAll(a.configDir())
 		if err != nil {
 			log.WithError(err).Error("error removing config dir")
 		}
 	}
+	fmt.Println("removing : ", a.logDir())
 	err = os.RemoveAll(a.logDir())
 	if err != nil {
 		log.WithError(err).Error("error removing log dir")
 	}
-	err = os.RemoveAll(a.runDir())
-	if err != nil {
-		log.WithError(err).Error("error removing config dir")
-	}
+	fmt.Println("removing : ", a.homeDir())
 	err = os.RemoveAll(a.homeDir())
 	if err != nil {
 		log.WithError(err).Error("error removing home dir")

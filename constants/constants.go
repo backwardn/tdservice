@@ -11,7 +11,6 @@ const (
 	ConfigDir            = "/etc/tdservice/"
 	ExecutableDir        = "/opt/tdservice/bin/"
 	LogDir               = "/var/log/tdservice/"
-	RunDir               = "/var/run/tdservice/"
 	LogFile              = "tdservice.log"
 	HTTPLogFile          = "http.log"
 	ConfigFile           = "config.yml"
