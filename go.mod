@@ -12,7 +12,7 @@ require (
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20190219172222-a4c6cb3142f2
 	gopkg.in/yaml.v2 v2.2.2
-	intel/isecl/lib/common v0.0.0
+	intel/isecl/lib/common v1.0.0-Beta
 )
 
-replace intel/isecl/lib/common => gitlab.devtools.intel.com/sst/isecl/lib/common v0.0.0-20190319012411-272076869a86
+replace intel/isecl/lib/common => github.com/intel-secl/common v1.0.0-Beta
