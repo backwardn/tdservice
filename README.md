@@ -43,8 +43,7 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 - Run scripts to build the threat detection service
 
 ```shell
-git clone https://github.intel.com/intel-secl/tdservice
-git checkout v1.0.0-Beta
+git clone https://github.com/intel-secl/tdservice.git
 cd tdservice
 make installer
 ```
@@ -56,7 +55,7 @@ make installer
 ### Direct dependencies
 
 | Name     | Repo URL                    | Minimum Version Required           |
-| -------- | --------------------------- | :---------------------------------:|
+| -------- | --------------------------- | :--------------------------------: |
 | uuid     | github.com/google/uuid      | v1.1.1                             |
 | context  | github.com/gorilla/context  | v1.1.1                             |
 | handlers | github.com/gorilla/handlers | v1.4.0                             |
