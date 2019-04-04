@@ -27,7 +27,7 @@
 sudo yum install -y git wget makeself
 ```
 
-### Install `go 1.11.4` or new
+### Install `go 1.11.4` or newer
 The `Threat Detection Service` requires Go version 11.4 that has support for `go modules`. The build was validated with version 11.4 version of `go`. It is recommended that you use a newer version of `go` - but please keep in mind that the product has been validated with 1.11.4 and newer versions of `go` may introduce compatibility issues. You can use the following to install `go`.
 ```shell
 wget https://dl.google.com/go/go1.11.4.linux-amd64.tar.gz
