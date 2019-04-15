@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 package postgres
 
 import (
@@ -15,7 +19,7 @@ type PostgresDatabase struct {
 }
 
 func (pd *PostgresDatabase) Migrate() error {
-	pd.DB.AutoMigrate(types.Host{}, types.Report{}, types.User{})
+	pd.DB.AutoMigrate(types.Host{}, types.Report{}, types.User{}, types.Role{})
 	pd.DB.Table("reports").
 		AddForeignKey("host_id", "hosts(id)", "SET NULL", "SET NULL")
 	return nil
@@ -31,6 +35,10 @@ func (pd *PostgresDatabase) ReportRepository() repository.ReportRepository {
 
 func (pd *PostgresDatabase) UserRepository() repository.UserRepository {
 	return &PostgresUserRepository{db: pd.DB}
+}
+
+func (pd *PostgresDatabase) RoleRepository() repository.RoleRepository {
+	return &PostgresRoleRepository{db: pd.DB}
 }
 
 func (pd *PostgresDatabase) Close() {

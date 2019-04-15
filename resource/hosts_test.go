@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 package resource
 
 import (
@@ -10,9 +14,10 @@ import (
 	"testing"
 
 	"github.com/jinzhu/gorm"
-
+	"golang.org/x/crypto/bcrypt"
 	"github.com/stretchr/testify/assert"
 )
+
 
 func TestCreateHost(t *testing.T) {
 	assert := assert.New(t)
@@ -27,7 +32,15 @@ func TestCreateHost(t *testing.T) {
 		assert.Equal("linux", h.OS)
 		return &h, nil
 	}
-	r := setupRouter(db)
+	user_role = types.Role {
+                        Name: "Administrators",
+                     }
+	db.MockUserRepository.CreateFunc = func(u types.User) (*types.User, error){
+		 u.PasswordHash, _ = bcrypt.GenerateFromPassword([]byte("password"), 10)
+                 u.Roles = []types.Role{user_role}
+		 return &u, nil
+	}	
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/tds/hosts", bytes.NewBufferString(`{"hostname": "host.intel.com", "version": "v1.0", "build": "1234", "os":"linux"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -54,7 +67,7 @@ func TestRetrieveHost(t *testing.T) {
 			Status: "Reserve for future implementation",
 		}, nil
 	}
-	r := setupRouter(db)
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/tds/hosts/12345", nil)
 	r.ServeHTTP(recorder, req)
@@ -64,13 +77,14 @@ func TestRetrieveHost(t *testing.T) {
 	assert.NotEmpty(recorder.Body.String())
 }
 
+
 func TestRetrieveHost404(t *testing.T) {
 	assert := assert.New(t)
 	db := new(mock.MockDatabase)
 	db.MockHostRepository.RetrieveFunc = func(h types.Host) (*types.Host, error) {
 		return nil, gorm.ErrRecordNotFound
 	}
-	r := setupRouter(db)
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/tds/hosts/12345", nil)
 	r.ServeHTTP(recorder, req)
@@ -87,7 +101,7 @@ func TestDeleteHost(t *testing.T) {
 		deleted = true
 		return nil
 	}
-	r := setupRouter(db)
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("DELETE", "/tds/hosts/12345", nil)
 	r.ServeHTTP(recorder, req)
@@ -96,12 +110,13 @@ func TestDeleteHost(t *testing.T) {
 }
 
 func TestDeleteHost404(t *testing.T) {
+
 	assert := assert.New(t)
 	db := new(mock.MockDatabase)
 	db.MockHostRepository.DeleteFunc = func(h types.Host) error {
 		return gorm.ErrRecordNotFound
 	}
-	r := setupRouter(db)
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("DELETE", "/tds/hosts/12345", nil)
 	r.ServeHTTP(recorder, req)
@@ -125,7 +140,7 @@ func TestQueryHosts(t *testing.T) {
 		h.ID = "12345"
 		return []types.Host{h}, nil
 	}
-	r := setupRouter(db)
+	r := setupRouter(db, user_role)
 	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/tds/hosts?hostname=10.1.2.3&version=1.0&build=1234&os=linux", nil)
 	r.ServeHTTP(recorder, req)
@@ -137,3 +152,4 @@ func TestQueryHosts(t *testing.T) {
 	json.Unmarshal(recorder.Body.Bytes(), &actual)
 	assert.Equal(expected, actual)
 }
+

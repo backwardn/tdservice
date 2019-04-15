@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 package client
 
 import (
@@ -64,7 +68,7 @@ func (c *Client) GetHost(id string) (*types.Host, error) {
 	return &fetched, nil
 }
 
-func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
+func (c *Client) AddHost(h types.HostInfo) (*types.HostCreateResponse, error) {
 	hosts, err := c.resolvePath("hosts")
 	if err != nil {
 		return nil, err
@@ -86,7 +90,7 @@ func (c *Client) AddHost(h types.HostInfo) (*types.Host, error) {
 		return nil, fmt.Errorf("failed to create host: %s: HTTP Code: %d", string(msg), rsp.StatusCode)
 	}
 	// parse it and return
-	var created types.Host
+	var created types.HostCreateResponse
 	err = json.NewDecoder(rsp.Body).Decode(&created)
 	if err != nil {
 		return nil, err

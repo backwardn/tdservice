@@ -1,7 +1,12 @@
+/*
+ * Copyright (C) 2019 Intel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 package main
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
@@ -15,6 +20,7 @@ import (
 	"intel/isecl/tdservice/resource"
 	"intel/isecl/tdservice/tasks"
 	"intel/isecl/tdservice/version"
+	e"intel/isecl/lib/common/exec"
 	"io"
 	"net/http"
 	"os"
@@ -34,12 +40,13 @@ import (
 
 	// Import driver for GORM
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+
+	"intel/isecl/tdservice/types"
 )
 
 type App struct {
-	HomeDir      string
+	HomeDir        string
 	ConfigDir      string
-	RunDir         string
 	LogDir         string
 	ExecutablePath string
 	Config         *config.Configuration
@@ -146,13 +153,6 @@ func (a *App) logDir() string {
 	return constants.LogDir
 }
 
-func (a *App) runDir() string {
-	if a.RunDir != "" {
-		return a.RunDir
-	}
-	return constants.RunDir
-}
-
 func (a *App) configureLogs() {
 	log.SetOutput(io.MultiWriter(os.Stderr, a.logWriter()))
 	log.SetLevel(a.configuration().LogLevel)
@@ -176,6 +176,9 @@ func (a *App) Run(args []string) error {
 	default:
 		fmt.Println("Error: Unrecognized command: ", args[1])
 		a.printUsage()
+	//TODO : Remove added for debug - used to debug db queries
+	case "testdb":
+		a.TestNewDBFunctions()
 	case "run":
 		return a.startServer()
 	case "-help":
@@ -285,7 +288,12 @@ func (a *App) startServer() error {
 			s(r, tdsDB)
 		}
 	}(resource.SetHosts, resource.SetReports, resource.SetVersion)
-
+	
+	tlsconfig := &tls.Config{
+                MinVersion:               tls.VersionTLS12,
+                CipherSuites:             []uint16{tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                                                  tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,},
+        }
 	// Setup signal handlers to gracefully handle termination
 	stop := make(chan os.Signal)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
@@ -294,6 +302,7 @@ func (a *App) startServer() error {
 		Addr:     fmt.Sprintf(":%d", c.Port),
 		Handler:  handlers.RecoveryHandler(handlers.RecoveryLogger(httpLog), handlers.PrintRecoveryStack(true))(handlers.CombinedLoggingHandler(a.httpLogWriter(), r)),
 		ErrorLog: httpLog,
+		TLSConfig: tlsconfig,
 	}
 
 	// dispatch web server go routine
@@ -346,30 +355,39 @@ func (a *App) status() error {
 }
 
 func (a *App) uninstall(keepConfig bool) {
+	fmt.Println("Uninstalling Threat Detection Service")
+	removeService()
+	fmt.Println("removing : ", a.executablePath())
 	err := os.Remove(a.executablePath())
 	if err != nil {
 		log.WithError(err).Error("error removing executable")
 	}
 	if !keepConfig {
+		fmt.Println("removing : ", a.configDir())
 		err = os.RemoveAll(a.configDir())
 		if err != nil {
 			log.WithError(err).Error("error removing config dir")
 		}
 	}
+	fmt.Println("removing : ", a.logDir())
 	err = os.RemoveAll(a.logDir())
 	if err != nil {
 		log.WithError(err).Error("error removing log dir")
 	}
-	err = os.RemoveAll(a.runDir())
-	if err != nil {
-		log.WithError(err).Error("error removing config dir")
-	}
+	fmt.Println("removing : ", a.homeDir())
 	err = os.RemoveAll(a.homeDir())
 	if err != nil {
 		log.WithError(err).Error("error removing home dir")
 	}
 	fmt.Fprintln(a.consoleWriter(), "Threat Detection Service uninstalled")
 	a.stop()
+}
+func removeService() {
+	_, _, err := e.RunCommandWithTimeout(constants.ServiceRemoveCmd, 5)
+	if err != nil {
+		fmt.Println("Could not remove Threat Detection Service")
+		fmt.Println("Error : ", err)
+	}
 }
 
 func validateCmdAndEnv(env_names_cmd_opts map[string]string, flags *flag.FlagSet) error {
@@ -464,4 +482,33 @@ func validateSetupArgs(cmd string, args []string) error {
 	}
 
 	return nil
+}
+
+//TODO : Debug code to be removed. Added for testing database query functions
+func (a *App) TestNewDBFunctions() error {
+	fmt.Println("Test New DB functions")
+	db, err := a.DatabaseFactory()
+	if err != nil {
+		log.WithError(err).Error("failed to open database")
+		return err
+	}
+	users, err := db.UserRepository().GetRoles(types.User{Name: "admin"})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Printf("User: %v", users)
+
+	defer db.Close()
+	return nil
+}
+
+func (a *App) DatabaseFactory() (repository.TDSDatabase, error) {
+	pg := &a.configuration().Postgres
+	p, err := postgres.Open(pg.Hostname, pg.Port, pg.DBName, pg.Username, pg.Password, pg.SSLMode)
+	if err != nil {
+		fmt.Println("failed to open postgres connection for setup task")
+		return nil, err
+	}
+	return p, nil
 }
