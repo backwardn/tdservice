@@ -50,7 +50,7 @@ if [ -z $SAVE_DB_INSTALL_LOG ] ; then
 fi
 
 # download postgres repo
-yum install https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-redhat11-11-2.noarch.rpm -y &>> $log_file
+yum install https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm -y &>> $log_file
 yum install postgresql11 postgresql11-server postgresql11-contrib postgresql11-libs -y &>> $log_file
 
 if [ $? -ne 0 ] ; then
